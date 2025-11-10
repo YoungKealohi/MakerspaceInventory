@@ -28,8 +28,3 @@ block content
     //- submit
     div
       button(type="submit")= submitLabel
-
-  //- If editing, show delete form
-  if machine && machine.MachineID
-    form(method="post", action=`/machines/${machine.MachineID}/delete`, onsubmit="return confirm('Delete this machine?');")
-      button(type="submit") Delete
