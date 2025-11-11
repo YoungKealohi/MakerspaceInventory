@@ -1,0 +1,56 @@
+extends layout
+
+block content
+  h1 New Supply for #{machine.MachineName}
+
+  form(method="post", action=formAction)
+    div
+      label(for="Name") Name:
+      input(type="text", name="Name", required)
+
+    div
+      label(for="Brand") Brand:
+      input(type="text", name="Brand", required)
+
+    div
+      label(for="Color") Color:
+      input(type="text", name="Color", required)  
+
+    div
+      label(for="LocationID") Location:
+      select(name="LocationID")
+        option(value="") -- Select Location --
+        each loc in locations
+          option(value=loc.LocationID)= loc.Name
+
+    div
+      label(for="SupplyType") Supply Type:
+      select(name="SupplyType", id="supplyType", required, onchange="toggleFields()")
+        option(value="") -- Select Type --
+        option(value="Countable") Countable
+        option(value="Status") Status
+
+    // Countable fields
+    div(id="countableFields", style="display:none; margin-top:10px")
+      label(for="Count") Count:
+      input(type="number", name="Count", min="0")
+      label(for="CriticalLevel") Critical Level:
+      input(type="number", name="CriticalLevel", min="0")
+
+    // Status fields
+    div(id="statusFields", style="display:none; margin-top:10px")
+      label Status:
+      select(name="Status")
+        option(value="1") Plenty
+        option(value="0") Need More
+
+    div
+      button(type="submit")= submitLabel
+      a(href=`/machines/${machine.MachineID}/supplies`) Cancel
+
+  script.
+    function toggleFields() {
+      const type = document.getElementById('supplyType').value;
+      document.getElementById('countableFields').style.display = type === 'Countable' ? 'block' : 'none';
+      document.getElementById('statusFields').style.display = type === 'Status' ? 'block' : 'none';
+    }

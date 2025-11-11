@@ -9,7 +9,7 @@ block content
     table(border="1" cellpadding="6" cellspacing="0")
       thead
         tr
-          th ID
+          //th ID
           th Name
           th Working
           th SerialNumber
@@ -18,8 +18,12 @@ block content
       tbody
         each m in machines
           tr
-            td= m.MachineID
-            td= m.MachineName
+            //td= m.MachineID
+            td
+              if m.MachineName
+                a(href=`/machines/${m.MachineID}/supplies`)= m.MachineName
+              else
+                | -
             td
               if m.WorkingStatus
                 | ✓

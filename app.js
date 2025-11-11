@@ -1,7 +1,8 @@
 const express = require("express");
-const indexRouter = require("./routes/index");
 const path = require("path");
-const machinesRouter = require("./routes/machines")
+const indexRouter = require("./routes/index");
+const machinesRouter = require("./routes/machines");
+const suppliesRouter = require("./routes/supply");
 
 const app = express();
 const port = 3000;
@@ -16,6 +17,7 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use('/', indexRouter);
+app.use('/', suppliesRouter);
 app.use('/machines', machinesRouter);
 
 //app.get("/", (req, res) => {
