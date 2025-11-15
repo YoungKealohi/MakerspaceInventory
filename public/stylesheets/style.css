@@ -1,7 +1,8 @@
 body {
-  background-image: url('public/images/makerspace.png');
+  background-image: url('/images/makerspace.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 }
+
 
