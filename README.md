@@ -2,7 +2,8 @@ Hey fun people! This is the stuff you gotta do to run the app on your device:
 1. Install Node.js - download it here: https://nodejs.org/ and the install it. You want Node.js v18 or later.
 2. Open the repo on your chosen code editor (mine is VS Code). Then, on cmd, cd into the MakerspaceInventory directory.
 3. Run Node app.js
-4. In a browser, go to http://localhost:3000
+4. **Optional** to make it so that you don't have to restart the app everytime you want to see the change you made reflected on the web page, run this: npm install -g nodemon. Then, instead of doing node app.js to run the app, do nodemon app.js.
+5. In a browser, go to http://localhost:3000
 BTW I am on a PC. I'm not sure if this is different on a Mac
 
 Optional:
