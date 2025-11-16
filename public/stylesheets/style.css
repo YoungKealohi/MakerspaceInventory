@@ -3,7 +3,39 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  height: 100dvh; /* dvh means dynamic viewport height. 100 means 100%. This makes it so that the image is always the size of the user's browser */
+  
 }
 
+.navbar {
+  color: #4f758b;
+  background-color: white;
+  font-size: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+  align-items: center;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar img {
+  height: 75px;
+  width: auto;  
+  padding: 10px;
+}
+
+.navbar h1 {
+  position: absolute;
+  left: 30%;
+}
+
+table {
+  background-color: white;
+}
+
+td.form {
+  display: flex;
+  gap: 5px;
+}
 
 

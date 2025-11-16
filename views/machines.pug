@@ -31,7 +31,7 @@ block content
                 | ✗
             td= m.SerialNumber || '-'
             td= m.Model || '-'
-            td
+            td.form
               //a(href=`/machines/${m.MachineID}/edit`) Edit
               if m && m.MachineID
                 form(method="post", action=`/machines/${m.MachineID}/edit`)
