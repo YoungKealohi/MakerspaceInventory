@@ -10,11 +10,11 @@ block content
 
     div
       label(for="Brand") Brand:
-      input(type="text", name="Brand", required)
+      input(type="text", name="Brand")
 
     div
       label(for="Color") Color:
-      input(type="text", name="Color", required)  
+      input(type="text", name="Color")  
 
     div
       label(for="LocationID") Location:
@@ -30,14 +30,14 @@ block content
         option(value="Countable") Countable
         option(value="Status") Status
 
-    // Countable fields
+    // Countable supplies
     div(id="countableFields", style="display:none; margin-top:10px")
       label(for="Count") Count:
       input(type="number", name="Count", min="0")
       label(for="CriticalLevel") Critical Level:
       input(type="number", name="CriticalLevel", min="0")
 
-    // Status fields
+    // Status supplies
     div(id="statusFields", style="display:none; margin-top:10px")
       label Status:
       select(name="Status")

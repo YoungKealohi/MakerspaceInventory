@@ -15,11 +15,15 @@ block content
           th Brand
           th Color
           th Count/Status
-          th Critically Low?
+          th Status
+          th Actions
       tbody
         each s in supplies
           tr
             td= s.SupplyName
+            td= s.LocationName || '-'
+            td= s.Brand || '-'
+            td= s.Color || '-'
             td
               if s.SupplyType === 'Countable'
                 = s.Count
@@ -28,7 +32,7 @@ block content
                     | Plenty
                 else if s.Status === 0
                     | Need more
-            td= s.LocationName || '-'
+            
             td
                 if s.SupplyType === 'Countable'
                     if s.Count <= s.CriticalLevel
@@ -40,10 +44,10 @@ block content
                         span(style="color:green; font-weight:bold") ✅ OK
                     else if s.Status === 0
                         span(style="color:red; font-weight:bold") ❌ Needs Order
-            td
+            td.form
               //a(href=`/machines/${m.MachineID}/edit`) Edit
-              if m && m.MachineID
-                form(method="post", action=`/machines/${m.MachineID}/edit`)
+              if machine && machine.MachineID
+                form(method="post", action=`/machines/${machine.MachineID}/edit`)
                   button(type="submit") Edit
-                form(method="post", action=`/machines/${m.MachineID}/delete`, onsubmit="return confirm('Delete this machine?');")
+                form(method="post", action=`/machines/${machine.MachineID}/delete`, onsubmit="return confirm('Delete this machine?');")
                   button(type="submit") Delete

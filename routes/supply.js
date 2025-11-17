@@ -63,7 +63,7 @@ router.post('/machines/:MachineID/supplies/new', async (req, res) => {
 
         await connection.beginTransaction();
         const [supplyResult] = await connection.query(
-            `INSERT INTO Supply (MachineID, LocationID, Name, Brand, Color) VALUES (?, ?, ?, ?)`,
+            `INSERT INTO Supply (MachineID, LocationID, Name, Brand, Color) VALUES (?, ?, ?, ?, ?)`,
             [MachineID, LocationID || null, Name, Brand || null, Color || null]
         );
         const newSupplyID = supplyResult.insertId;
@@ -75,7 +75,7 @@ router.post('/machines/:MachineID/supplies/new', async (req, res) => {
             );
         } 
         else if (SupplyType === 'Status') {
-            await conn.query(
+            await connection.query(
                 `INSERT INTO StatusSupply (SupplyID, Status) VALUES (?, ?)`,
                 [newSupplyID, Status ? 1 : 0]
             );
