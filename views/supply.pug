@@ -2,7 +2,10 @@ extends layout
 
 block content
   h1 #{machine.MachineName}
-  a(href=`/machines/${machine.MachineID}/supplies/new`) Add New Supply
+  p 
+    a(href=`/machines/`) Go Back To List of Machines
+  p 
+    a(href=`/machines/${machine.MachineID}/supplies/new`) Add New Supply
   if supplies.length === 0
     p No supplies yet.
   else

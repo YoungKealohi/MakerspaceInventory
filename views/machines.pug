@@ -2,10 +2,14 @@ extends layout
 
 block content
   h1 Machines
-  a(href="/machines/new") Add Machine
+  p 
+    a(href="/") Go back to Home
+  p
+    a(href="/machines/new") Add Machine
   if machines.length === 0
     p No machines yet.
   else
+    p Click on the name of a machine to view its supplies.
     table(border="1" cellpadding="6" cellspacing="0")
       thead
         tr
@@ -34,8 +38,9 @@ block content
             td.form
               //a(href=`/machines/${m.MachineID}/edit`) Edit
               if m && m.MachineID
-                form(method="post", action=`/machines/${m.MachineID}/edit`)
+                form(method="get", action=`/machines/${m.MachineID}/edit`)
                   button(type="submit") Edit
                 form(method="post", action=`/machines/${m.MachineID}/delete`, onsubmit="return confirm('Delete this machine?');")
                   button(type="submit") Delete
+  p ***You can only delete machines that do not have any supplies.  
                 

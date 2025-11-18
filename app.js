@@ -24,9 +24,19 @@ app.use('/', indexRouter);
 app.use('/', suppliesRouter);
 app.use('/machines', machinesRouter);
 
-//app.get("/", (req, res) => {
-  //  res.json({ message: "ok" });
-//});
+/*
+app.use(async (req, res, next) => {
+  try {
+    const [rows] = await pool.query("SELECT MachineID, MachineName FROM Machine");
+    res.locals.machines = rows;
+    next();
+  } catch (err) {
+    console.error(err);
+    res.locals.machines = [];
+    next();
+  }
+});
+*/
 
 app.listen(port, () => {
  console.log(`Example app listening at http://localhost:${port}`);
