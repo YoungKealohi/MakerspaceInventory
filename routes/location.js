@@ -23,7 +23,9 @@ router.post("/new", async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM Location ORDER BY Name');
-    res.render('locations', { locations: rows });
+    res.render('locations', { locations: rows,
+      
+     });
   } catch (err) {
     console.error('Error fetching machines', err);
     res.status(500).send('Database error');

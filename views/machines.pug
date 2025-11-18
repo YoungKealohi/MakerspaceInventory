@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h1 Machines
+  h1=title
   p 
     a(href="/") Go back to Home
   p
@@ -9,38 +9,33 @@ block content
   if machines.length === 0
     p No machines yet.
   else
-    p Click on the name of a machine to view its supplies.
-    table(border="1" cellpadding="6" cellspacing="0")
-      thead
-        tr
-          //th ID
-          th Name
-          th Working
-          th SerialNumber
-          th Model
-          th Actions
-      tbody
-        each m in machines
-          tr
-            //td= m.MachineID
-            td
-              if m.MachineName
-                a(href=`/machines/${m.MachineID}/supplies`)= m.MachineName
-              else
-                | -
-            td
-              if m.WorkingStatus
-                | ✓
-              else
-                | ✗
-            td= m.SerialNumber || '-'
-            td= m.Model || '-'
-            td.form
-              //a(href=`/machines/${m.MachineID}/edit`) Edit
-              if m && m.MachineID
-                form(method="get", action=`/machines/${m.MachineID}/edit`)
-                  button(type="submit") Edit
-                form(method="post", action=`/machines/${m.MachineID}/delete`, onsubmit="return confirm('Delete this machine?');")
-                  button(type="submit") Delete
+
+    .machine-grid
+      each machine in machines
+        .machine-card
+          h3= machine.MachineName 
+            a(href="/machines/:MachineID/supplies") 
+
+          p
+            strong Model: 
+            | #{machine.Model || "N/A"}
+
+          p
+            strong Serial Number: 
+            | #{machine.SerialNumber || "N/A"}
+
+          p
+            strong Status: 
+            if machine.WorkingStatus
+              span.status-ok Working
+            else
+              span.status-bad Not Working
+          p 
+            .card-actions
+              a.button(href=`/machines/${machine.MachineID}/supplies`) View Supplies
+              a.button(href=`/machines/edit/${machine.MachineID}`) Edit
+              a.button.delete(href=`/machines/delete/${machine.MachineID}`) Delete
+
+        
   p ***You can only delete machines that do not have any supplies.  
                 
