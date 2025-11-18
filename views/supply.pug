@@ -6,6 +6,8 @@ block content
     a(href=`/machines/`) Go Back To List of Machines
   p 
     a(href=`/machines/${machine.MachineID}/supplies/new`) Add New Supply
+  p 
+    a(href=`/locations/`) View Locations
   if supplies.length === 0
     p No supplies yet.
   else

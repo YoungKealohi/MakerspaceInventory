@@ -3,6 +3,7 @@ const path = require("path");
 const indexRouter = require("./routes/index");
 const machinesRouter = require("./routes/machines");
 const suppliesRouter = require("./routes/supply");
+const locationsRouter = require("./routes/location");
 
 const app = express();
 const port = 3000;
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/', suppliesRouter);
 app.use('/machines', machinesRouter);
+app.use('/locations', locationsRouter);
 
 /*
 app.use(async (req, res, next) => {

@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h2 Add Location
+
+  form(action="/locations/add" method="POST")
+    div
+      label(for="name") Name:
+      input(type="text" id="name" name="name" maxlength="10" required)
+
+    div
+      label(for="description") Description:
+      textarea(id="description" name="description")
+
+    button(type="submit") Add Location
