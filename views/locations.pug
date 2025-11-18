@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  h2 Locations
+
+  table
+    thead
+      tr
+        th Name
+        th Description
+        th Actions
+    tbody
+      each loc in locations
+        tr
+          td= loc.LocationID
+          td= loc.Name
+          td= loc.Description || "—"
+          td
+            a(href=`/locations/edit/${loc.LocationID}`) Edit
+            |
+            a(href=`/locations/delete/${loc.LocationID}`) Delete
+
+  br
+  a(href="/locations/add") Add New Location
