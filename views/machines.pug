@@ -1,41 +1,39 @@
 extends layout
 
 block content
-  h1=title
+  
   p 
-    a(href="/") Go back to Home
+    a.button-nav(href="/") Go back Home
   p
-    a(href="/machines/new") Add Machine
+    a.button-nav(href="/machines/new") Add Machine
+
   if machines.length === 0
     p No machines yet.
   else
-
     .machine-grid
       each machine in machines
-        .machine-card
-          h3= machine.MachineName 
-            a(href="/machines/:MachineID/supplies") 
+          .machine-card
+            h3= machine.MachineName
 
-          p
-            strong Model: 
-            | #{machine.Model || "N/A"}
+            p
+              strong Model:
+              | #{machine.Model || "N/A"}
 
-          p
-            strong Serial Number: 
-            | #{machine.SerialNumber || "N/A"}
+            p
+              strong Serial Number:
+              | #{machine.SerialNumber || "N/A"}
 
-          p
-            strong Status: 
-            if machine.WorkingStatus
-              span.status-ok Working
-            else
-              span.status-bad Not Working
-          p 
+            p
+              strong Status:
+              if machine.WorkingStatus
+                span.status-ok Working
+              else
+                span.status-bad Not Working
+
             .card-actions
-              a.button(href=`/machines/${machine.MachineID}/supplies`) View Supplies
+              a.button(href=`/machines/${machine.MachineID}/supplies`) Supplies
               a.button(href=`/machines/edit/${machine.MachineID}`) Edit
               a.button.delete(href=`/machines/delete/${machine.MachineID}`) Delete
 
-        
-  p ***You can only delete machines that do not have any supplies.  
-                
+
+  p ***You can only delete machines that do not have any supplies.

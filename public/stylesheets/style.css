@@ -6,11 +6,18 @@ body {
 
 body.index {
   background-image: url('/images/makerspaceV2.png');
-
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   height: 100dvh; /* dvh means dynamic viewport height. 100 means 100%. This makes it so that the image is always the size of the user's browser */
+}
+
+p {
+  margin: 10px;
+}
+
+h1 {
+  margin: 10px;
 }
 
 .navbar {
@@ -37,6 +44,7 @@ body.index {
 
 table {
   background-color: white;
+  margin: 10px;
 }
 
 td.form {
@@ -62,9 +70,23 @@ td.form {
   padding: 15px 20px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
 }
 
 .machine-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.machine-card-link {
+  text-decoration: none;
+  color: inherit;            /* keep text colors normal */
+  display: block;            /* makes the whole area clickable */
+  margin: 0;              /* remove unintended margins */
+  padding: 0;             /* remove extra padding if any on link */
+}
+
+.machine-card-link:hover .machine-card {
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -126,3 +148,15 @@ td.form {
 .add-button:hover {
   background: #1f7e32;
 }
+
+.button-nav {
+  text-decoration: none;
+  background: #007298;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 5px;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+
