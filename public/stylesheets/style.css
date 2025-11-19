@@ -1,11 +1,12 @@
 body {
   
-  
+  margin: 0;
   
 }
 
 body.index {
-  background-image: url('../images/makerspaceV2.png');
+  background-image: url('/images/makerspaceV2.png');
+
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
