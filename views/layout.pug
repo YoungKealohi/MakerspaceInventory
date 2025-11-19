@@ -4,25 +4,9 @@ html
     meta(charset="utf-8")
     title= title
     link(rel="stylesheet", href="/stylesheets/style.css")
-  body
+  body(class=page)
     header.navbar
       img(src="/images/hpu-primary-color-400px.png") 
       h1=title  
     block content
     
-//
-  .left
-        img(src="/images/hpu-primary-color-400px.png") 
-      h1.nav-title Makerspace Inventory
-      .right
-        nav.nav-links
-          a(href="/") Home
-          //a(href="/machines") Machines
-          .dropdown
-            a.dropdown-btwn(href="#") Machines ▾
-            .dropdown-content
-              each machine in machines
-                a(href=`/machines/${machine.MachineID}`)= machine.MachineName
-              a(href="/machines/add") Add Machine
-          a(href="/supplies") Supplies
-          a(href="/locations") Locations 

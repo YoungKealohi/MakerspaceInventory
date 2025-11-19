@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../db/pool");
 
 router.get('/', (req, res) => {
-    res.render('index', { title: "Welcome" });
+    res.render('index', { title: "Welcome", page: "index" });
 });
 
 module.exports = router;
