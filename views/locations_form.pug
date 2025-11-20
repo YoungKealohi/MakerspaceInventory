@@ -1,15 +1,20 @@
 extends layout
 
 block content
-  h2 Add Location
+  if location && location.LocationID
+    h1 Edit Location #{location.LocationID}
+  else
+    h1 New Location
 
-  form(action="/locations/add" method="POST")
+  form(method="post", action=formAction)
+    //- Name
     div
-      label(for="name") Name:
-      input(type="text" id="name" name="name" maxlength="10" required)
-
+      label(for="Name") Name
+      input#Name(type="text", name="Name", required, maxlength="30", value=location.Name || '')
+    //- Description
     div
-      label(for="description") Description:
-      textarea(id="description" name="description")
-
-    button(type="submit") Add Location
+      label(for="Description") Description
+      input#Description(type="text", name="Description", maxlength="50", value=location.Description || '')
+    div
+      button(type="submit")= submitLabel
+      a.button-nav-cancel(href=`/locations/`) Cancel

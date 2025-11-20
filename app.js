@@ -3,7 +3,7 @@ const path = require("path");
 const indexRouter = require("./routes/index");
 const machinesRouter = require("./routes/machines");
 const suppliesRouter = require("./routes/supply");
-const locationsRouter = require("./routes/location");
+const locationsRouter = require("./routes/locations");
 
 const app = express();
 const port = 3000;

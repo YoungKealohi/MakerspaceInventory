@@ -3,11 +3,11 @@ extends layout
 block content
   h1 #{machine.MachineName}
   p 
-    a(href=`/machines/`) Go Back To List of Machines
+    a.button-nav(href=`/machines/`) Go Back To List of Machines
   p 
-    a(href=`/machines/${machine.MachineID}/supplies/new`) Add New Supply
+    a.button-nav(href=`/machines/${machine.MachineID}/supplies/new`) Add New Supply
   p 
-    a(href=`/locations/`) View Locations
+    a.button-nav(href=`/locations/`) View Locations
   if supplies.length === 0
     p No supplies yet.
   else

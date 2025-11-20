@@ -1,9 +1,12 @@
 extends layout
 
 block content
-  h2 Locations
+  h1 Locations
 
-  table
+  p
+    a.button-nav(href="/locations/new") Add New Location
+
+  table(border="1" cellpadding="6" cellspacing="0")
     thead
       tr
         th Name
@@ -12,13 +15,12 @@ block content
     tbody
       each loc in locations
         tr
-          td= loc.LocationID
           td= loc.Name
           td= loc.Description || "—"
-          td
-            a(href=`/locations/edit/${loc.LocationID}`) Edit
-            |
-            a(href=`/locations/delete/${loc.LocationID}`) Delete
+          td.form
+            // EDIT: GET request (correct)
+            a.button(href=`/locations/${loc.LocationID}/edit`) Edit
 
-  br
-  a(href="/locations/add") Add New Location
+            // DELETE: POST request with confirmation
+            form(method="post", action=`/locations/delete/${loc.LocationID}`, onsubmit="return confirm('Delete this location?');")
+              button.delete(type="submit") Delete

@@ -46,7 +46,7 @@ block content
 
     div
       button(type="submit")= submitLabel
-      a(href=`/machines/${machine.MachineID}/supplies`) Cancel
+      a.button-nav-cancel(href=`/machines/${machine.MachineID}/supplies`) Cancel
 
   script.
     function toggleFields() {
