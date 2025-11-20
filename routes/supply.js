@@ -4,7 +4,7 @@ const pool = require("../db/pool");
 const router = express.Router();
 
 // list the supplies
-router.get('/machines/:MachineID/supplies', async (req, res) => {
+router.get('/:MachineID/supplies', async (req, res) => {
   const { MachineID } = req.params;
   try {
     const [machineRows] = await pool.query('SELECT * FROM Machine WHERE MachineID = ?', [MachineID]);
@@ -34,7 +34,7 @@ router.get('/machines/:MachineID/supplies', async (req, res) => {
 });
 
 // blank new supply form
-router.get('/machines/:MachineID/supplies/new', async (req, res) => {
+router.get('/:MachineID/supplies/new', async (req, res) => {
     const { MachineID } = req.params;
     try {
         const [machineRows] = await pool.query('SELECT * FROM Machine WHERE MachineID = ?', [MachineID]);
@@ -54,7 +54,7 @@ router.get('/machines/:MachineID/supplies/new', async (req, res) => {
 });
 
 // create the new supply
-router.post('/machines/:MachineID/supplies/new', async (req, res) => {
+router.post('/:MachineID/supplies/new', async (req, res) => {
     const { MachineID } = req.params;
     const { Name, Brand, Color, LocationID, SupplyType, Count, CriticalLevel, Status } = req.body;
 
@@ -92,28 +92,139 @@ router.post('/machines/:MachineID/supplies/new', async (req, res) => {
   }
 });
 
-// edit machine form
-router.get('/machines/:MachineID/supplies/new', async (req, res) => {
-  const { MachineID } = req.params;
-  try {
-    const [rows] = await pool.query('SELECT * FROM Machine WHERE MachineID = ?', [MachineID]);
-    if (rows.length === 0) return res.status(404).send('Machine not found');
+// edit supply form
+router.get('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
+    const { MachineID, SupplyID } = req.params;
 
-    const machine = rows[0];
-    // convert numeric 1/0 to boolean-ish for form rendering
-    machine.WorkingStatus = machine.WorkingStatus ? 1 : 0;
+    try {
+        const [[machine]] = await pool.query(
+            'SELECT * FROM Machine WHERE MachineID = ?',
+            [MachineID]
+        );
+        if (!machine) return res.status(404).send('Machine not found');
 
-    res.render('machines_form', {
-      machine,
-      formAction: `/machines/${MachineID}/edit`,
-      submitLabel: 'Save Changes'
-    });
-  } catch (err) {
-    console.error('Error loading machine', err);
-    res.status(500).send('Database error');
-  }
+        // Base supply
+        const [[supply]] = await pool.query(
+            `SELECT *
+             FROM Supply 
+             WHERE SupplyID = ? AND MachineID = ?`,
+            [SupplyID, MachineID]
+        );
+        if (!supply) return res.status(404).send('Supply not found');
+
+        // Check for Countable
+        const [[countable]] = await pool.query(
+            'SELECT * FROM CountableSupply WHERE SupplyID = ?',
+            [SupplyID]
+        );
+
+        // Check for Status
+        const [[status]] = await pool.query(
+            'SELECT * FROM StatusSupply WHERE SupplyID = ?',
+            [SupplyID]
+        );
+
+        // Load all locations
+        const [locations] = await pool.query(
+            'SELECT * FROM Location ORDER BY Name ASC'
+        );
+
+        // Determine supply type
+        let SupplyType = countable ? 'Countable' : 'Status';
+
+        res.render('supply_form', {
+            machine,
+            locations,
+            supply,
+            countable,
+            status,
+            SupplyType,
+            formAction: `/machines/${MachineID}/supplies/${SupplyID}/edit`,
+            submitLabel: 'Save Changes'
+        });
+
+    } catch (err) {
+        console.error('Error loading edit supply form', err);
+        res.status(500).send('Database error');
+    }
 });
 
+// update supply
+router.post('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
+    const { MachineID, SupplyID } = req.params;
+    const { Name, Brand, Color, LocationID, SupplyType, Count, CriticalLevel, Status } = req.body;
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Update base Supply
+        await connection.query(
+            `UPDATE Supply 
+             SET Name = ?, Brand = ?, Color = ?, LocationID = ?
+             WHERE SupplyID = ? AND MachineID = ?`,
+            [Name, Brand, Color, LocationID, SupplyID, MachineID]
+        );
+
+        // Clear existing child rows
+        await connection.query(`DELETE FROM CountableSupply WHERE SupplyID = ?`, [SupplyID]);
+        await connection.query(`DELETE FROM StatusSupply WHERE SupplyID = ?`, [SupplyID]);
+
+        // Insert updated child row
+        if (SupplyType === 'Countable') {
+            await connection.query(
+                `INSERT INTO CountableSupply (SupplyID, Count, CriticalLevel)
+                 VALUES (?, ?, ?)`,
+                [SupplyID, Count || 0, CriticalLevel || 0]
+            );
+        } else {
+            await connection.query(
+                `INSERT INTO StatusSupply (SupplyID, Status)
+                 VALUES (?, ?)`,
+                [SupplyID, Status ? 1 : 0]
+            );
+        }
+
+        await connection.commit();
+        res.redirect(`/machines/${MachineID}/supplies`);
+    } catch (err) {
+        await connection.rollback();
+        console.error('Error updating supply', err);
+        res.status(500).send('Error updating supply');
+    } finally {
+        connection.release();
+    }
+});
+
+// delete supply
+router.post('/:MachineID/supplies/:SupplyID/delete', async (req, res) => {
+    const { MachineID, SupplyID } = req.params;
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // delete child rows first
+        await connection.query(`DELETE FROM CountableSupply WHERE SupplyID = ?`, [SupplyID]);
+        await connection.query(`DELETE FROM StatusSupply WHERE SupplyID = ?`, [SupplyID]);
+
+        // delete parent supply
+        await connection.query(
+            `DELETE FROM Supply WHERE SupplyID = ? AND MachineID = ?`,
+            [SupplyID, MachineID]
+        );
+
+        await connection.commit();
+        res.redirect(`/machines/${MachineID}/supplies`);
+
+    } catch (err) {
+        await connection.rollback();
+        console.error('Error deleting supply', err);
+        res.status(500).send('Error deleting supply');
+    } finally {
+        connection.release();
+    }
+});
 
 
 
