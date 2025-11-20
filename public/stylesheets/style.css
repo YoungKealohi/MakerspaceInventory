@@ -20,6 +20,10 @@ h1 {
   margin: 10px;
 }
 
+h2 {
+  margin: 10px;
+}
+
 .navbar {
   color: #4f758b;
   background-color: white;
@@ -155,7 +159,19 @@ td.form {
   color: white;
   padding: 6px 12px;
   border-radius: 5px;
-  margin-right: 10px;
+  margin: 10px;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.button-nav-cancel {
+  text-decoration: none;
+  background: #007298;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 5px;
+  margin: 10px;
+  gap: 10px;
   font-size: 14px;
 }
 

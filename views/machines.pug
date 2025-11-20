@@ -32,8 +32,8 @@ block content
 
             .card-actions
               a.button(href=`/machines/${machine.MachineID}/supplies`) Supplies
-              a.button(href=`/machines/edit/${machine.MachineID}`) Edit
-              a.button.delete(href=`/machines/delete/${machine.MachineID}`) Delete
+              a.button(href=`/machines/${machine.MachineID}/edit`) Edit
+              a.button.delete(href=`/machines/${machine.MachineID}/delete`) Delete
 
 
   p ***You can only delete machines that do not have any supplies.
