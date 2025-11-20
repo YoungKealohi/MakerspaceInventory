@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  .login-container
+    h1 Login
+    
+    if error
+      p.error-message= error
+    
+    form.login-form(method="post", action="/login")
+      .form-group
+        label(for="username") Username:
+        input#username(type="text", name="username", required, placeholder="Enter username")
+      
+      .form-group
+        label(for="password") Password:
+        input#password(type="password", name="password", required, placeholder="Enter password")
+      
+      button.button-login(type="submit") Login
+    
+    p
+      a.button-nav(href="/") Back to Home
