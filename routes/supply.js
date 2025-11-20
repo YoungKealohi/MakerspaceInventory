@@ -92,6 +92,28 @@ router.post('/machines/:MachineID/supplies/new', async (req, res) => {
   }
 });
 
+// edit machine form
+router.get('/machines/:MachineID/supplies/new', async (req, res) => {
+  const { MachineID } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM Machine WHERE MachineID = ?', [MachineID]);
+    if (rows.length === 0) return res.status(404).send('Machine not found');
+
+    const machine = rows[0];
+    // convert numeric 1/0 to boolean-ish for form rendering
+    machine.WorkingStatus = machine.WorkingStatus ? 1 : 0;
+
+    res.render('machines_form', {
+      machine,
+      formAction: `/machines/${MachineID}/edit`,
+      submitLabel: 'Save Changes'
+    });
+  } catch (err) {
+    console.error('Error loading machine', err);
+    res.status(500).send('Database error');
+  }
+});
+
 
 
 
