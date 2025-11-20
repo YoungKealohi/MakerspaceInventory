@@ -49,9 +49,7 @@ block content
                     else if s.Status === 0
                         span(style="color:red; font-weight:bold") ❌ Needs Order
             td.form
-              //a(href=`/machines/${m.MachineID}/edit`) Edit
               if machine && machine.MachineID && s && s.SupplyID
-                form(method="post", action=`/machines/${machine.MachineID}/edit`)
-                  button(type="submit") Edit
-                form(method="post", action=`/machines/${machine.MachineID}/delete`, onsubmit="return confirm('Delete this machine?');")
+                a(href=`/machines/${machine.MachineID}/supplies/${s.SupplyID}/edit`) Edit
+                form(method="post", action=`/machines/${machine.MachineID}/supplies/${s.SupplyID}/delete`, onsubmit="return confirm('Delete this machine?');")
                   button(type="submit") Delete

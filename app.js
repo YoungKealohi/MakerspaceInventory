@@ -22,9 +22,10 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
-app.use('/machines', machinesRouter);
+
 app.use('/locations', locationsRouter);
-app.use('/', suppliesRouter);
+app.use('/machines', suppliesRouter);
+app.use('/machines', machinesRouter);
 
 /*
 app.use(async (req, res, next) => {
