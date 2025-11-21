@@ -1,10 +1,15 @@
 extends layout
 
+
 block content
-  
   .logout-button-container
     a.button-logout(href="/") Log out
-  
+
+  // Admin Start Inventory button (top right, below navbar)
+  if isAdmin
+    .start-inventory-container
+      a.button-start-inventory(href="/start-inventory") Start Inventory
+
   p
     a.button-nav(href="/machines/new") Add Machine
   p 

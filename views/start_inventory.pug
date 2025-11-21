@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  h1.start-inventory-title Start Inventory
+  if machines.length === 0
+    p No machines or supplies found.
+  else
+    form.start-inventory-form(method="post", action="/start-inventory")
+      .machines-inventory-list-list
+        each machine in machines
+          .machine-inventory-list-item
+            h2.machine-inventory-title= machine.MachineName
+            if machine.supplies.length === 0
+              p.no-supplies No supplies for this machine.
+            else
+              table.machine-inventory-table
+                thead
+                  tr
+                    th Supply Name
+                    th Brand
+                    th Color
+                    th Type
+                    th Value
+                tbody
+                  each supply in machine.supplies
+                    tr
+                      td= supply.SupplyName
+                      td= supply.Brand || '-'
+                      td= supply.Color || '-'
+                      td= supply.SupplyType
+                      td
+                        if supply.SupplyType === 'Countable'
+                          input(type="number", name=`count_${supply.SupplyID}`, min="0", value=supply.Count || 0, class="inventory-input")
+                        else if supply.SupplyType === 'Status'
+                          select(name=`status_${supply.SupplyID}`, class="inventory-select")
+                            option(value="1", selected=supply.Status === 1) Plenty
+                            option(value="0", selected=supply.Status === 0) Need More
+      button(type="submit", class="button save-inventory-btn") Save Inventory
