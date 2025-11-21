@@ -41,7 +41,8 @@ block content
             .card-actions
               a.button(href=`/machines/${machine.MachineID}/supplies`) Supplies
               a.button(href=`/machines/${machine.MachineID}/edit`) Edit
-              a.button.delete(href=`/machines/${machine.MachineID}/delete`) Delete
+              form(method="post", action=`/machines/${machine.MachineID}/delete`, onsubmit="return confirm('Delete this machine and all its supplies?');", style="display:inline;")
+                button.delete(type="submit") Delete
 
 
   p ***You can only delete machines that do not have any supplies.

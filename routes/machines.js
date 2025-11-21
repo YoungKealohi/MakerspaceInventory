@@ -84,15 +84,32 @@ router.post('/:MachineID/edit', async (req, res) => {
   }
 });
 
-//delete machine form
+// Delete machine and all its supplies
 router.post('/:MachineID/delete', async (req, res) => {
   const { MachineID } = req.params;
+  const connection = await pool.getConnection();
   try {
-    await pool.query('DELETE FROM Machine WHERE MachineID = ?', [MachineID]);
+    await connection.beginTransaction();
+    // Get all supplies for this machine
+    const [supplies] = await connection.query('SELECT SupplyID FROM Supply WHERE MachineID = ?', [MachineID]);
+    const supplyIDs = supplies.map(s => s.SupplyID);
+    if (supplyIDs.length > 0) {
+      // Delete from CountableSupply and StatusSupply
+      await connection.query('DELETE FROM CountableSupply WHERE SupplyID IN (?)', [supplyIDs]);
+      await connection.query('DELETE FROM StatusSupply WHERE SupplyID IN (?)', [supplyIDs]);
+      // Delete supplies
+      await connection.query('DELETE FROM Supply WHERE MachineID = ?', [MachineID]);
+    }
+    // Delete the machine
+    await connection.query('DELETE FROM Machine WHERE MachineID = ?', [MachineID]);
+    await connection.commit();
     res.redirect('/machines');
   } catch (err) {
-    console.error('Error deleting machine', err);
-    res.status(500).send('Error deleting machine');
+    await connection.rollback();
+    console.error('Error deleting machine and its supplies', err);
+    res.status(500).send('Error deleting machine and its supplies');
+  } finally {
+    connection.release();
   }
 });
 
