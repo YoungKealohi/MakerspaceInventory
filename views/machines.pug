@@ -43,6 +43,3 @@ block content
               a.button(href=`/machines/${machine.MachineID}/edit`) Edit
               form(method="post", action=`/machines/${machine.MachineID}/delete`, onsubmit="return confirm('Delete this machine and all its supplies?');", style="display:inline;")
                 button.delete(type="submit") Delete
-
-
-  p ***You can only delete machines that do not have any supplies.
