@@ -114,7 +114,9 @@
 body {
   
   margin: 0;
-  
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+  font-size: 18px;
 }
 
 body.index {
@@ -131,10 +133,14 @@ p {
 
 h1 {
   margin: 10px;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 h2 {
   margin: 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .navbar {
@@ -264,7 +270,7 @@ td.form {
   border-radius: 5px;
   margin: 2px 5px;
   display: inline-block;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .button-nav-cancel {
@@ -320,6 +326,33 @@ td.form {
   box-sizing: border-box;
   background-color: white;
 
+}
+
+/* Larger textarea for location descriptions */
+#Description {
+  display: block;
+  width: 100%;
+  max-width: 520px; /* match Name width */
+  min-height: 88px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+/* Ensure the Name input matches the textarea width */
+input#Name {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff;
 }
 
 .form-group input:focus,

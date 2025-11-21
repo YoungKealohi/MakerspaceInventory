@@ -11,10 +11,10 @@ block content
     div
       label(for="Name") Name
       input#Name(type="text", name="Name", required, maxlength="30", value=location.Name || '')
-    //- Description
+    //- Description (larger textarea)
     div
       label(for="Description") Description
-      input#Description(type="text", name="Description", maxlength="50", value=location.Description || '')
+      textarea#Description(name="Description", rows="4", maxlength="200")= location.Description || ''
     div
       button(type="submit")= submitLabel
       a.button-nav-cancel(href=`/locations/`) Cancel
