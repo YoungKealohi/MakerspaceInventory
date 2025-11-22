@@ -5,32 +5,43 @@ const router = express.Router();
 
 // list the supplies
 router.get('/:MachineID/supplies', async (req, res) => {
-  const { MachineID } = req.params;
-  try {
-    const [machineRows] = await pool.query('SELECT * FROM Machine WHERE MachineID = ?', [MachineID]);
-    const [supplyRows] = await pool.query(
-        `SELECT s.SupplyID, s.Name AS SupplyName, s.Color, s.Brand,
-            l.Name AS LocationName, cs.Count, cs.CriticalLevel, ss.Status,
-            CASE
-                WHEN cs.SupplyID IS NOT NULL THEN 'Countable'
-                WHEN ss.SupplyID IS NOT NULL THEN 'Status'
-            END AS SupplyType    
-        FROM Supply s
-        LEFT JOIN CountableSupply cs ON s.SupplyID = cs.SupplyID
-        LEFT JOIN StatusSupply ss ON s.SupplyID = ss.SupplyID
-        LEFT JOIN Location l ON s.LocationID = l.LocationID
-        WHERE s.MachineID = ? 
-        ORDER BY s.SupplyID ASC`, [MachineID]);
+    const { MachineID } = req.params;
+    const q = req.query.q ? String(req.query.q).trim() : '';
+    try {
+        const [machineRows] = await pool.query('SELECT * FROM Machine WHERE MachineID = ?', [MachineID]);
+        if (machineRows.length == 0) return res.status(404).send('Machine not found');
 
-    if (machineRows.length == 0) return res.status(404).send('Machine not found');
-    res.render('supply', { 
-        machine: machineRows[0],
-        supplies: supplyRows
-    });
-  } catch (err) {
-    console.error('Error fetching machines', err);
-    res.status(500).send('Database error');
-  }
+        // Build query with optional name filter
+        let sql = `SELECT s.SupplyID, s.Name AS SupplyName, s.Color, s.Brand,
+                        l.Name AS LocationName, cs.Count, cs.CriticalLevel, ss.Status,
+                        CASE
+                                WHEN cs.SupplyID IS NOT NULL THEN 'Countable'
+                                WHEN ss.SupplyID IS NOT NULL THEN 'Status'
+                        END AS SupplyType
+                FROM Supply s
+                LEFT JOIN CountableSupply cs ON s.SupplyID = cs.SupplyID
+                LEFT JOIN StatusSupply ss ON s.SupplyID = ss.SupplyID
+                LEFT JOIN Location l ON s.LocationID = l.LocationID
+                WHERE s.MachineID = ?`;
+
+        const params = [MachineID];
+        if (q) {
+            sql += ' AND s.Name LIKE ?';
+            params.push(`%${q}%`);
+        }
+        sql += ' ORDER BY s.SupplyID ASC';
+
+        const [supplyRows] = await pool.query(sql, params);
+
+        res.render('supply', {
+            machine: machineRows[0],
+            supplies: supplyRows,
+            q
+        });
+    } catch (err) {
+        console.error('Error fetching machines', err);
+        res.status(500).send('Database error');
+    }
 });
 
 // blank new supply form
@@ -75,9 +86,10 @@ router.post('/:MachineID/supplies/new', async (req, res) => {
             );
         } 
         else if (SupplyType === 'Status') {
+            const statusValue = Number(Status) === 1 ? 1 : 0;
             await connection.query(
                 `INSERT INTO StatusSupply (SupplyID, Status) VALUES (?, ?)`,
-                [newSupplyID, Status ? 1 : 0]
+                [newSupplyID, statusValue]
             );
         }
         await connection.commit();
@@ -178,10 +190,11 @@ router.post('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
                 [SupplyID, Count || 0, CriticalLevel || 0]
             );
         } else {
+            const statusValue = Number(Status) === 1 ? 1 : 0;
             await connection.query(
                 `INSERT INTO StatusSupply (SupplyID, Status)
                  VALUES (?, ?)`,
-                [SupplyID, Status ? 1 : 0]
+                [SupplyID, statusValue]
             );
         }
 

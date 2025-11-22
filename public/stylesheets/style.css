@@ -69,6 +69,29 @@
   border-color: #007298;
 }
 
+/* Search form styling (match other inputs/buttons) */
+.inventory-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px; /* revert to left-aligned layout */
+  justify-content: flex-start;
+}
+.inventory-search .inventory-input {
+  width: 320px; /* fixed width so it doesn't span full page */
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+.inventory-search .button {
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+.inventory-search a.button {
+  text-decoration: none;
+  display: inline-block;
+  padding: 8px 10px;
+}
+
 .save-inventory-btn {
   display: block;
   margin: 30px auto 0 auto;

@@ -75,8 +75,6 @@ router.post('/:LocationID/edit', async (req, res) => {
   }
 });
 
-// Deprecated: confirmation page removed — deletion uses inline JS confirm in the list view
-
 // Delete location via POST (matches delete forms in views)
 router.post('/delete/:LocationID', async (req, res) => {
   const { LocationID } = req.params;
@@ -97,6 +95,7 @@ router.post('/delete/:LocationID', async (req, res) => {
     connection.release();
   }
 });
+
 // Also accept POST to '/:LocationID/delete' (some views use that action)
 router.post('/:LocationID/delete', async (req, res) => {
   const { LocationID } = req.params;
