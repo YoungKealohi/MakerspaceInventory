@@ -25,6 +25,7 @@ router.post('/login', (req, res) => {
     const user = users.find(u => u.username === username && u.password === password);
     
     if (user) {
+        req.session.username = username; // <-- set username in session
         // Successful login - redirect to machines page
         res.redirect('/machines');
     } else {
@@ -34,6 +35,12 @@ router.post('/login', (req, res) => {
             error: "Invalid username or password" 
         });
     }
+});
+
+router.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
 });
 
 module.exports = router;

@@ -4,6 +4,11 @@ const indexRouter = require("./routes/index");
 const machinesRouter = require("./routes/machines");
 const suppliesRouter = require("./routes/supply");
 const locationsRouter = require("./routes/locations");
+const startInventoryRouter = require("./routes/start_inventory");
+
+const session = require('express-session');
+
+
 
 const app = express();
 const port = 3000;
@@ -14,7 +19,11 @@ app.use(
     })
 );
 
-
+app.use(session({
+  secret: 'yourSecretKey', // use a strong secret in production!
+  resave: false,
+  saveUninitialized: true
+}));
 
 
 app.set('view engine', 'pug');
@@ -23,9 +32,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 
+
 app.use('/locations', locationsRouter);
 app.use('/machines', suppliesRouter);
 app.use('/machines', machinesRouter);
+app.use('/', startInventoryRouter);
 
 /*
 app.use(async (req, res, next) => {

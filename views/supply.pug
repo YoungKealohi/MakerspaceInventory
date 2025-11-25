@@ -2,10 +2,17 @@ extends layout
 
 block content
   h1 #{machine.MachineName}
-  p 
+  p
     a.button-nav(href=`/machines/`) Go Back To List of Machines
-  p 
+  p
     a.button-nav(href=`/machines/${machine.MachineID}/supplies/new`) Add New Supply
+
+  //- Search form
+  form.inventory-search(method="get", action=`/machines/${machine.MachineID}/supplies`)
+    input.inventory-input(type="text", name="q", placeholder="Search supplies by name...", value=(typeof q !== 'undefined' ? q : ''))
+    button.button(type="submit") Search
+    if q
+      a.button(href=`/machines/${machine.MachineID}/supplies`, style="margin-left:8px") Clear
   
   if supplies.length === 0
     p No supplies yet.
@@ -25,7 +32,11 @@ block content
         each s in supplies
           tr
             td= s.SupplyName
-            td= s.LocationName || '-'
+            td
+              if s.Locations && s.Locations.length > 0
+                = s.Locations.map(loc => loc.Name).join(', ')
+              else
+                | -
             td= s.Brand || '-'
             td= s.Color || '-'
             td

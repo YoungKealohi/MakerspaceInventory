@@ -1,7 +1,145 @@
+
+/* Start Inventory Page Styles */
+.start-inventory-title {
+  text-align: center;
+  color: #4f758b;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.start-inventory-form {
+  max-width: 900px;
+  margin: 0 auto 40px auto;
+}
+
+.machines-inventory-list-list {
+  display: block;
+  width: 100%;
+}
+
+.machine-inventory-list-item {
+  margin-bottom: 36px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.machine-inventory-title {
+  color: #007298;
+  margin-bottom: 14px;
+  font-size: 1.15em;
+  text-align: left;
+  margin-left: 6px;
+}
+
+.no-supplies {
+  color: #c00;
+  text-align: left;
+  margin: 12px 0 12px 8px;
+}
+
+.machine-inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+.machine-inventory-table th, .machine-inventory-table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px 10px;
+  text-align: left;
+}
+.machine-inventory-table th {
+  background: #f5f7fa;
+  color: #4f758b;
+  font-weight: bold;
+}
+.machine-inventory-table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.inventory-input, .inventory-select {
+  width: 90%;
+  padding: 5px 8px;
+  border: 1px solid #b0b0b0;
+  border-radius: 5px;
+  font-size: 1em;
+  background: #f8fafd;
+}
+.inventory-input:focus, .inventory-select:focus {
+  outline: none;
+  border-color: #007298;
+}
+
+/* Search form styling (match other inputs/buttons) */
+.inventory-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px; /* revert to left-aligned layout */
+  justify-content: flex-start;
+}
+.inventory-search .inventory-input {
+  width: 320px; /* fixed width so it doesn't span full page */
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+.inventory-search .button {
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+.inventory-search a.button {
+  text-decoration: none;
+  display: inline-block;
+  padding: 8px 10px;
+}
+
+.save-inventory-btn {
+  display: block;
+  margin: 30px auto 0 auto;
+  background: #28a745;
+  color: white;
+  padding: 12px 36px;
+  border-radius: 7px;
+  font-size: 1.1em;
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.save-inventory-btn:hover {
+  background: #1f7e32;
+}
+/* Start Inventory button styles */
+.start-inventory-container {
+  position: absolute;
+  top: 90px; /* below navbar */
+  right: 30px;
+  z-index: 900;
+}
+
+.button-start-inventory {
+  background: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+
+.button-start-inventory:hover {
+  background: #1f7e32;
+}
 body {
   
   margin: 0;
-  
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+  font-size: 18px;
 }
 
 body.index {
@@ -18,10 +156,14 @@ p {
 
 h1 {
   margin: 10px;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 h2 {
   margin: 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .navbar {
@@ -49,6 +191,12 @@ h2 {
 table {
   background-color: white;
   margin: 10px;
+  	/* Removed table-layout property to allow auto sizing */
+}
+
+/* Allow supply name column to wrap and be wider */
+td, th {
+  word-break: break-word;
 }
 
 td.form {
@@ -84,22 +232,12 @@ td.form form {
   position: relative;
 }
 
-.machine-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
 .machine-card-link {
   text-decoration: none;
   color: inherit;            /* keep text colors normal */
   display: block;            /* makes the whole area clickable */
   margin: 0;              /* remove unintended margins */
   padding: 0;             /* remove extra padding if any on link */
-}
-
-.machine-card-link:hover .machine-card {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .machine-card h3 {
@@ -183,7 +321,7 @@ td.form form {
   border-radius: 5px;
   margin: 2px 5px;
   display: inline-block;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .button-nav-cancel {
@@ -239,6 +377,33 @@ td.form form {
   box-sizing: border-box;
   background-color: white;
 
+}
+
+/* Larger textarea for location descriptions */
+#Description {
+  display: block;
+  width: 100%;
+  max-width: 520px; /* match Name width */
+  min-height: 88px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+/* Ensure the Name input matches the textarea width */
+input#Name {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff;
 }
 
 .form-group input:focus,
