@@ -336,11 +336,14 @@ td.form form {
   text-decoration: none;
   background: #007298;
   color: white;
-  padding: 4px 8px;
+  padding: 10px 20px;
   border-radius: 5px;
-  margin: 10px;
-  gap: 10px;
-  font-size: 14px;
+  margin: 0;
+  margin-left: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
+  cursor: pointer;
 }
 
 /* Login page styles */
