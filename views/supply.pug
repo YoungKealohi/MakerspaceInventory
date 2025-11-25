@@ -64,6 +64,6 @@ block content
                         span(style="color:red; font-weight:bold") ❌ Needs Order
             td.form
               if machine && machine.MachineID && s && s.SupplyID
-                a(href=`/machines/${machine.MachineID}/supplies/${s.SupplyID}/edit`) Edit
-                form(method="post", action=`/machines/${machine.MachineID}/supplies/${s.SupplyID}/delete`, onsubmit="return confirm('Delete this machine?');")
-                  button(type="submit") Delete
+                a.button(href=`/machines/${machine.MachineID}/supplies/${s.SupplyID}/edit`) Edit
+                form(method="post", action=`/machines/${machine.MachineID}/supplies/${s.SupplyID}/delete`, onsubmit="return confirm('Delete this supply?');")
+                  button.delete(type="submit") Delete

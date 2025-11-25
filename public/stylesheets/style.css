@@ -202,6 +202,13 @@ td, th {
 td.form {
   display: flex;
   gap: 5px;
+  align-items: center;
+}
+
+td.form form {
+  margin: 0;
+  padding: 0;
+  display: inline;
 }
 
 
@@ -262,6 +269,9 @@ td.form {
   border-radius: 5px;
   margin: 5px;
   font-size: 14px;
+  display: inline-block;
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background 0.2s ease;
 }
 
 .button:hover {
@@ -270,6 +280,18 @@ td.form {
 
 .delete {
   background: #d9534f;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background 0.2s ease;
+  display: inline-block;
+  text-decoration: none;
+  line-height: normal;
+  vertical-align: middle;
 }
 
 .delete:hover {
@@ -470,17 +492,75 @@ input#Name {
   background: #b52b27;
 }
 
-.button-schedule {
-  text-decoration: none;
-  background: #5bc0de;
+/* Form styling for supply and other forms */
+form {
+  margin-left: 20px;
+  padding: 20px;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+form input[type="text"],
+form input[type="number"],
+form select {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form select:focus {
+  outline: none;
+  border-color: #007298;
+}
+
+form button[type="submit"] {
+  background: #007298;
   color: white;
   padding: 10px 20px;
+  border: none;
   border-radius: 5px;
   font-size: 16px;
   font-weight: bold;
-  display: inline-block;
+  cursor: pointer;
+  margin-right: 10px;
 }
 
-.button-schedule:hover {
-  background: #31b0d5;
+form button[type="submit"]:hover {
+  background: #005a73;
 }
+
+/* Override submit button styling for delete buttons */
+button.delete,
+form button.delete {
+  background: #d9534f !important;
+  padding: 6px 12px !important;
+  font-size: 14px !important;
+}
+
+button.delete:hover,
+form button.delete:hover {
+  background: #b52b27 !important;
+}
+
+
+
+
+
+
+
+
