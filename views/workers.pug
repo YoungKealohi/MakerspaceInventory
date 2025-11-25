@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  .logout-button-container
+    a.button-logout(href="/") Log out
+
+  h1 Workers
+  p 
+    a.button-nav(href=`/machines/`) Go Back To Machines
+
+  p
+    a.button-nav(href="/workers/new") Add New Worker
+
+  table(border="1" cellpadding="6" cellspacing="0")
+    thead
+      tr
+        th Name
+        th Role
+        th Phone Number
+        th Email
+        th Actions
+    tbody
+      each worker in workers
+        tr
+          td= worker.FirstName + ' ' + worker.LastName
+          td= worker.IsBoss ? 'Boss' : 'Worker'
+          td= worker.PhoneNumber || '—'
+          td= worker.Email || '—'
+          td.form
+            a.button(href=`/workers/${worker.WorkerID}/edit`) Edit
+            form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');")
+              button.delete(type="submit") Delete

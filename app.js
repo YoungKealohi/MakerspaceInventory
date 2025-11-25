@@ -6,6 +6,7 @@ const suppliesRouter = require("./routes/supply");
 const locationsRouter = require("./routes/locations");
 const startInventoryRouter = require("./routes/start_inventory");
 const scheduleRouter = require("./routes/schedule");
+const workerRouter = require("./routes/worker");
 
 const session = require('express-session');
 
@@ -39,6 +40,7 @@ app.use('/machines', suppliesRouter);
 app.use('/machines', machinesRouter);
 app.use('/', startInventoryRouter);
 app.use('/schedule', scheduleRouter);
+app.use('/workers', workerRouter);
 
 /*
 app.use(async (req, res, next) => {
