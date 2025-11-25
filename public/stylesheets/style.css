@@ -630,10 +630,6 @@ form button.delete:hover {
   border-bottom: 1px solid #ddd;
 }
 
-.machine-status-table tbody tr:hover {
-  background: rgba(79, 117, 139, 0.1);
-}
-
 .machine-status-table tbody tr:last-child td {
   border-bottom: none;
 }
