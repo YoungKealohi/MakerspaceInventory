@@ -599,6 +599,7 @@ form button.delete:hover {
   font-size: 1.8rem;
   margin-bottom: 15px;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  text-align: center;
   margin-left: 0;
 }
 
