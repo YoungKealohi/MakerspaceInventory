@@ -74,7 +74,7 @@ router.post('/:LocationID/edit', async (req, res) => {
     res.status(500).send('Database error');
   }
 });
-
+/*
 // Delete location via POST (matches delete forms in views)
 router.post('/delete/:LocationID', async (req, res) => {
   const { LocationID } = req.params;
@@ -94,7 +94,7 @@ router.post('/delete/:LocationID', async (req, res) => {
   } finally {
     connection.release();
   }
-});
+}); */
 
 // Also accept POST to '/:LocationID/delete' (some views use that action)
 router.post('/:LocationID/delete', async (req, res) => {
@@ -102,7 +102,7 @@ router.post('/:LocationID/delete', async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    await connection.query('UPDATE Supply SET LocationID = NULL WHERE LocationID = ?', [LocationID]);
+    await connection.query('DELETE FROM SupplyLocation WHERE LocationID = ?', [LocationID]);
     await connection.query('DELETE FROM Location WHERE LocationID = ?', [LocationID]);
     await connection.commit();
     res.redirect('/locations');
