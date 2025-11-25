@@ -126,13 +126,30 @@
   font-weight: bold;
   text-decoration: none;
   display: inline-block;
-  margin-bottom: 10px;
+  margin-right: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   transition: background 0.2s;
 }
 
 .button-start-inventory:hover {
   background: #1f7e32;
+}
+
+.button-schedule {
+  background: #007298;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+
+.button-schedule:hover {
+  background: #005a73;
 }
 body {
   
@@ -147,7 +164,8 @@ body.index {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  height: 100dvh; /* dvh means dynamic viewport height. 100 means 100%. This makes it so that the image is always the size of the user's browser */
+  min-height: 100vh;
+  background-attachment: fixed;
 }
 
 p {
@@ -567,6 +585,95 @@ button.delete:hover,
 form button.delete:hover {
   background: #b52b27 !important;
 }
+
+/* Homepage machine status table */
+.homepage-content {
+  position: absolute;
+  top: 120px;
+  left: 30px;
+  max-width: 500px;
+}
+
+.homepage-title {
+  color: white;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  margin-left: 0;
+}
+
+.machine-status-table {
+  background: rgba(255, 255, 255, 0.95);
+  border-collapse: collapse;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0;
+}
+
+.machine-status-table thead {
+  background: #4f758b;
+  color: white;
+}
+
+.machine-status-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.machine-status-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.machine-status-table tbody tr:hover {
+  background: rgba(79, 117, 139, 0.1);
+}
+
+.machine-status-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.machine-name-cell {
+  font-weight: bold;
+  color: #333;
+  font-size: 1.05rem;
+}
+
+.status-cell {
+  text-align: center;
+}
+
+.status-available {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.status-unavailable {
+  color: #d9534f;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.no-machines {
+  color: white;
+  font-size: 1.2rem;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+}
+
+
+
+
+
+
+
+
 
 
 

@@ -3,4 +3,25 @@ extends layout
 block content
   .login-button-container
     a.button-login-home(href="/login") Login
+  
+  .homepage-content
+    h2.homepage-title Machine Status
+    
+    if machines && machines.length > 0
+      table.machine-status-table
+        thead
+          tr
+            th Machine Name
+            th Status
+        tbody
+          each machine in machines
+            tr
+              td.machine-name-cell= machine.MachineName
+              td.status-cell
+                if machine.WorkingStatus
+                  span.status-available Available
+                else
+                  span.status-unavailable Unavailable
+    else
+      p.no-machines No machines available.
 

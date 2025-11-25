@@ -8,8 +8,28 @@ const users = [
     { username: 'user', password: 'user123' }
 ];
 
-router.get('/', (req, res) => {
-    res.render('index', { title: "Welcome", page: "index" });
+router.get('/', async (req, res) => {
+    try {
+        // Fetch all machines with their status
+        const [machines] = await pool.query(`
+            SELECT MachineID, MachineName, WorkingStatus, Model, SerialNumber 
+            FROM Machine 
+            ORDER BY MachineName
+        `);
+        
+        res.render('index', { 
+            title: "Welcome", 
+            page: "index",
+            machines: machines 
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('index', { 
+            title: "Welcome", 
+            page: "index",
+            machines: [] 
+        });
+    }
 });
 
 // GET login page
