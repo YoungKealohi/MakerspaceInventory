@@ -2,8 +2,8 @@ extends layout
 
 block content
   .logout-button-container
-    a.button-schedule(href="/schedule") Schedule
     a.button-logout(href="/") Log out
+
   if location && location.LocationID
     h1 Edit Location #{location.LocationID}
   else

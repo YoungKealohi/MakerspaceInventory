@@ -3,7 +3,6 @@ extends layout
 
 block content
   .logout-button-container
-    a.button-schedule(href="/schedule") Schedule
     a.button-logout(href="/") Log out
   if machine && machine.MachineID
     h1 Edit Machine #{machine.MachineID}
