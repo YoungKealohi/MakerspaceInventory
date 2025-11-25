@@ -13,7 +13,7 @@ router.get('/:MachineID/supplies', async (req, res) => {
 
         // Build query with optional name filter
         let sql = `SELECT s.SupplyID, s.Name AS SupplyName, s.Color, s.Brand,
-                        l.Name AS LocationName, cs.Count, cs.CriticalLevel, ss.Status,
+                        cs.Count, cs.CriticalLevel, ss.Status,
                         CASE
                                 WHEN cs.SupplyID IS NOT NULL THEN 'Countable'
                                 WHEN ss.SupplyID IS NOT NULL THEN 'Status'
@@ -21,7 +21,6 @@ router.get('/:MachineID/supplies', async (req, res) => {
                 FROM Supply s
                 LEFT JOIN CountableSupply cs ON s.SupplyID = cs.SupplyID
                 LEFT JOIN StatusSupply ss ON s.SupplyID = ss.SupplyID
-                LEFT JOIN Location l ON s.LocationID = l.LocationID
                 WHERE s.MachineID = ?`;
 
         const params = [MachineID];
@@ -32,6 +31,17 @@ router.get('/:MachineID/supplies', async (req, res) => {
         sql += ' ORDER BY s.SupplyID ASC';
 
         const [supplyRows] = await pool.query(sql, params);
+
+        // For each supply, fetch its locations from SupplyLocation
+        for (let supply of supplyRows) {
+            const [locRows] = await pool.query(
+                `SELECT l.LocationID, l.Name FROM SupplyLocation sl
+                 LEFT JOIN Location l ON sl.LocationID = l.LocationID
+                 WHERE sl.SupplyID = ? ORDER BY l.Name`,
+                [supply.SupplyID]
+            );
+            supply.Locations = locRows;
+        }
 
         res.render('supply', {
             machine: machineRows[0],
@@ -67,18 +77,18 @@ router.get('/:MachineID/supplies/new', async (req, res) => {
 // create the new supply
 router.post('/:MachineID/supplies/new', async (req, res) => {
     const { MachineID } = req.params;
-    const { Name, Brand, Color, LocationID, SupplyType, Count, CriticalLevel, Status } = req.body;
+    const { Name, Brand, Color, LocationIDs, SupplyType, Count, CriticalLevel, Status } = req.body;
 
     const connection = await pool.getConnection();
     try {
-
         await connection.beginTransaction();
         const [supplyResult] = await connection.query(
-            `INSERT INTO Supply (MachineID, LocationID, Name, Brand, Color) VALUES (?, ?, ?, ?, ?)`,
-            [MachineID, LocationID || null, Name, Brand || null, Color || null]
+            `INSERT INTO Supply (MachineID, Name, Brand, Color) VALUES (?, ?, ?, ?)`,
+            [MachineID, Name, Brand || null, Color || null]
         );
         const newSupplyID = supplyResult.insertId;
 
+        // Handle CountableSupply or StatusSupply
         if (SupplyType === 'Countable') {
             await connection.query(
                 `INSERT INTO CountableSupply (SupplyID, Count, CriticalLevel) VALUES (?, ?, ?)`,
@@ -92,6 +102,20 @@ router.post('/:MachineID/supplies/new', async (req, res) => {
                 [newSupplyID, statusValue]
             );
         }
+
+        // Insert into SupplyLocation for each selected location
+        if (LocationIDs && LocationIDs.length > 0) {
+            const locArray = Array.isArray(LocationIDs) ? LocationIDs : [LocationIDs];
+            for (let locId of locArray) {
+                if (locId) {
+                    await connection.query(
+                        `INSERT INTO SupplyLocation (SupplyID, LocationID) VALUES (?, ?)`,
+                        [newSupplyID, locId]
+                    );
+                }
+            }
+        }
+
         await connection.commit();
         res.redirect(`/machines/${MachineID}/supplies`);
 
@@ -101,7 +125,7 @@ router.post('/:MachineID/supplies/new', async (req, res) => {
         res.status(500).send('Error creating supply');
     } finally {
         connection.release();
-  }
+    }
 });
 
 // edit supply form
@@ -141,6 +165,13 @@ router.get('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
             'SELECT * FROM Location ORDER BY Name ASC'
         );
 
+        // Load selected locations for this supply from SupplyLocation
+        const [selectedLocations] = await pool.query(
+            'SELECT LocationID FROM SupplyLocation WHERE SupplyID = ?',
+            [SupplyID]
+        );
+        const selectedLocationIds = selectedLocations.map(row => row.LocationID);
+
         // Determine supply type
         let SupplyType = countable ? 'Countable' : 'Status';
 
@@ -151,6 +182,7 @@ router.get('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
             countable,
             status,
             SupplyType,
+            selectedLocationIds,
             formAction: `/machines/${MachineID}/supplies/${SupplyID}/edit`,
             submitLabel: 'Save Changes'
         });
@@ -164,18 +196,18 @@ router.get('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
 // update supply
 router.post('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
     const { MachineID, SupplyID } = req.params;
-    const { Name, Brand, Color, LocationID, SupplyType, Count, CriticalLevel, Status } = req.body;
+    const { Name, Brand, Color, LocationIDs, SupplyType, Count, CriticalLevel, Status } = req.body;
 
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
 
-        // Update base Supply
+        // Update base Supply (no LocationID)
         await connection.query(
             `UPDATE Supply 
-             SET Name = ?, Brand = ?, Color = ?, LocationID = ?
+             SET Name = ?, Brand = ?, Color = ?
              WHERE SupplyID = ? AND MachineID = ?`,
-            [Name, Brand, Color, LocationID, SupplyID, MachineID]
+            [Name, Brand, Color, SupplyID, MachineID]
         );
 
         // Clear existing child rows
@@ -196,6 +228,20 @@ router.post('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
                  VALUES (?, ?)`,
                 [SupplyID, statusValue]
             );
+        }
+
+        // Clear and update SupplyLocation mappings
+        await connection.query(`DELETE FROM SupplyLocation WHERE SupplyID = ?`, [SupplyID]);
+        if (LocationIDs && LocationIDs.length > 0) {
+            const locArray = Array.isArray(LocationIDs) ? LocationIDs : [LocationIDs];
+            for (let locId of locArray) {
+                if (locId) {
+                    await connection.query(
+                        `INSERT INTO SupplyLocation (SupplyID, LocationID) VALUES (?, ?)`,
+                        [SupplyID, locId]
+                    );
+                }
+            }
         }
 
         await connection.commit();
@@ -220,6 +266,7 @@ router.post('/:MachineID/supplies/:SupplyID/delete', async (req, res) => {
         // delete child rows first
         await connection.query(`DELETE FROM CountableSupply WHERE SupplyID = ?`, [SupplyID]);
         await connection.query(`DELETE FROM StatusSupply WHERE SupplyID = ?`, [SupplyID]);
+        await connection.query(`DELETE FROM SupplyLocation WHERE SupplyID = ?`, [SupplyID]);
 
         // delete parent supply
         await connection.query(

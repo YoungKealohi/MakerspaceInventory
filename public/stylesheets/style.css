@@ -191,6 +191,12 @@ h2 {
 table {
   background-color: white;
   margin: 10px;
+  	/* Removed table-layout property to allow auto sizing */
+}
+
+/* Allow supply name column to wrap and be wider */
+td, th {
+  word-break: break-word;
 }
 
 td.form {

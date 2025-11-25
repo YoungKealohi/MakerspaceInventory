@@ -20,14 +20,18 @@ block content
       input(type="text", name="Color", value=supply ? supply.Color : "")
 
     div
-      label(for="LocationID") Location:
-      select(name="LocationID")
-        option(value="") -- Select Location --
+      label Locations (select multiple):
+      div(style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;")
         each loc in locations
-          option(
-            value=loc.LocationID 
-            selected=(supply && supply.LocationID == loc.LocationID)
-          )= loc.Name
+          div(style="margin-bottom: 8px;")
+            input(
+              type="checkbox", 
+              name="LocationIDs", 
+              value=loc.LocationID,
+              id=`loc_${loc.LocationID}`,
+              checked=(selectedLocationIds && selectedLocationIds.includes(loc.LocationID))
+            )
+            label(for=`loc_${loc.LocationID}`, style="margin-left: 5px; cursor: pointer;")= loc.Name
 
     div
       label(for="SupplyType") Supply Type:

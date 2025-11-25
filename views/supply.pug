@@ -32,7 +32,11 @@ block content
         each s in supplies
           tr
             td= s.SupplyName
-            td= s.LocationName || '-'
+            td
+              if s.Locations && s.Locations.length > 0
+                = s.Locations.map(loc => loc.Name).join(', ')
+              else
+                | -
             td= s.Brand || '-'
             td= s.Color || '-'
             td
