@@ -451,6 +451,8 @@ input#Name {
   top: 20px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  gap: 10px;
 }
 
 .button-logout {
@@ -468,6 +470,17 @@ input#Name {
   background: #b52b27;
 }
 
+.button-schedule {
+  text-decoration: none;
+  background: #5bc0de;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
+}
 
-
-
+.button-schedule:hover {
+  background: #31b0d5;
+}

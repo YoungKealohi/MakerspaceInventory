@@ -3,8 +3,9 @@ extends layout
 
 block content
   .logout-button-container
+    a.button-schedule(href="/schedule") Schedule
     a.button-logout(href="/") Log out
-
+    
   // Admin Start Inventory button (top right, below navbar)
   if isAdmin
     .start-inventory-container

@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  .logout-button-container
+    a.button-schedule(href="/schedule") Schedule
+    a.button-logout(href="/") Log out
   h1 #{machine.MachineName}
   p
     a.button-nav(href=`/machines/`) Go Back To List of Machines
