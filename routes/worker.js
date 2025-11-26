@@ -5,19 +5,40 @@ const pool = require("../db/pool");
 // GET /workers - List all workers
 router.get("/", async (req, res) => {
   try {
-    // Get workers with their specialties and availability count
+    // Get workers with their specialties
     const [workers] = await pool.query(`
       SELECT 
         w.*,
-        GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') as specialties,
-        COUNT(DISTINCT wa.WorkerAvailabilityID) as availabilityCount
+        GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') as specialties
       FROM Worker w
       LEFT JOIN WorkerSpecialty ws ON w.WorkerID = ws.WorkerID
       LEFT JOIN Machine m ON ws.MachineID = m.MachineID
-      LEFT JOIN WorkerAvailability wa ON w.WorkerID = wa.WorkerID
       GROUP BY w.WorkerID
       ORDER BY w.LastName, w.FirstName
     `);
+    
+    // Get availability for each worker
+    for (let worker of workers) {
+      const [availability] = await pool.query(`
+        SELECT FromDate, ToDate, StartTime, EndTime
+        FROM WorkerAvailability
+        WHERE WorkerID = ?
+        ORDER BY FromDate DESC
+      `, [worker.WorkerID]);
+      
+      if (availability.length > 0) {
+        // Format availability as "Nov 24 - Nov 28"
+        const avail = availability[0];
+        const fromDate = new Date(avail.FromDate);
+        const toDate = new Date(avail.ToDate);
+        const dateOptions = { month: 'short', day: 'numeric' };
+        const fromStr = fromDate.toLocaleDateString('en-US', dateOptions);
+        const toStr = toDate.toLocaleDateString('en-US', dateOptions);
+        worker.availabilityDisplay = `${fromStr} - ${toStr}`;
+      } else {
+        worker.availabilityDisplay = '—';
+      }
+    }
     
     res.render("workers", {
       title: "Workers",

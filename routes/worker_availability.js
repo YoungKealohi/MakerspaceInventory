@@ -19,7 +19,7 @@ router.get("/:workerId", async (req, res) => {
       SELECT * 
       FROM WorkerAvailability 
       WHERE WorkerID = ?
-      ORDER BY Availability DESC
+      ORDER BY FromDate DESC, StartTime
     `, [workerId]);
     
     res.render("worker_availability", {

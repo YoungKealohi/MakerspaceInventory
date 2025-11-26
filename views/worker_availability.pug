@@ -25,12 +25,16 @@ block content
     table(border="1" cellpadding="6" cellspacing="0")
       thead
         tr
-          th Date & Time
+          th From Date
+          th To Date
+          th Time Range
           th Actions
       tbody
         each avail in availabilities
           tr
-            td= new Date(avail.Availability).toLocaleString()
+            td= new Date(avail.FromDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            td= new Date(avail.ToDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            td= avail.StartTime.substring(0, 5) + ' - ' + avail.EndTime.substring(0, 5)
             td.form
               form(method="post", action=`/worker-availability/delete/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
                 button.delete(type="submit") Remove
