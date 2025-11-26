@@ -34,3 +34,78 @@ block content
     div
       button(type="submit")= submitLabel
       a.button-nav-cancel(href=`/workers/`) Cancel
+
+  if worker && worker.WorkerID
+    hr
+    
+    h2 Machine Specialties
+    
+    h3 Add New Specialty
+    form(method="post", action=`/workers/${worker.WorkerID}/add-specialty`)
+      div
+        label(for="MachineID") Machine:
+        select#MachineID(name="MachineID", required)
+          option(value="") -- Select Machine --
+          each machine in machines
+            option(value=machine.MachineID)= machine.MachineName
+      div
+        button(type="submit") Add Specialty
+    
+    h3 Current Specialties
+    if specialties && specialties.length > 0
+      table(border="1" cellpadding="6" cellspacing="0")
+        thead
+          tr
+            th Machine Name
+            th Actions
+        tbody
+          each specialty in specialties
+            tr
+              td= specialty.MachineName
+              td.form
+                form(method="post", action=`/workers/${worker.WorkerID}/delete-specialty/${specialty.WorkerSpecialtyID}`, onsubmit="return confirm('Remove this specialty?');")
+                  button.delete(type="submit") Remove
+    else
+      p No specialties assigned yet.
+    
+    hr
+    
+    h2 Availability Schedule
+    
+    h3 Add New Availability
+    form(method="post", action=`/workers/${worker.WorkerID}/add-availability`)
+      div
+        label(for="FromDate") From Date:
+        input#FromDate(type="date", name="FromDate", required)
+      div
+        label(for="ToDate") To Date:
+        input#ToDate(type="date", name="ToDate", required)
+      div
+        label(for="StartTime") Start Time:
+        input#StartTime(type="time", name="StartTime", required)
+      div
+        label(for="EndTime") End Time:
+        input#EndTime(type="time", name="EndTime", required)
+      div
+        button(type="submit") Add Availability
+    
+    h3 Current Availability
+    if availabilities && availabilities.length > 0
+      table(border="1" cellpadding="6" cellspacing="0")
+        thead
+          tr
+            th From Date
+            th To Date
+            th Time
+            th Actions
+        tbody
+          each avail in availabilities
+            tr
+              td= new Date(avail.FromDate).toLocaleDateString()
+              td= new Date(avail.ToDate).toLocaleDateString()
+              td= avail.StartTime.substring(0, 5) + ' - ' + avail.EndTime.substring(0, 5)
+              td.form
+                form(method="post", action=`/workers/${worker.WorkerID}/delete-availability/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
+                  button.delete(type="submit") Remove
+    else
+      p No availability scheduled yet.

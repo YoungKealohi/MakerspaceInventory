@@ -8,7 +8,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
-  connectionLimit: 10
+  connectionLimit: 10,
+  timezone: '-10:00' // Hawaii-Aleutian Standard Time (HST)
 });
 
 module.exports = pool;

@@ -4,24 +4,254 @@ block content
   .login-button-container
     a.button-login-home(href="/login") Login
   
-  .homepage-content
-    h2.homepage-title Machine Status
-    
-    if machines && machines.length > 0
-      table.machine-status-table
-        thead
-          tr
-            th Machine Name
-            th Status
-        tbody
-          each machine in machines
+  .dashboard-flex
+    .schedule-widget
+      h2.schedule-title Worker Schedule
+      .schedule-nav
+        button#prevDay.nav-button ← Previous
+        .day-info
+          h3#currentDay.current-day Monday
+          p#currentDate.current-date
+        button#nextDay.nav-button Next →
+      .schedule-content
+        #mondaySchedule.day-schedule
+          if availability && availability.length > 0
+            table.schedule-table
+              thead
+                tr
+                  th Worker Name
+                  th Specialties
+                  th Availability
+                  th Time
+              tbody
+                each avail in availability
+                  - var dayOfWeek = avail.DayOfWeek
+                  if dayOfWeek === 2
+                    - var startHour = parseInt(avail.StartTime.substring(0, 2))
+                    - var startMin = avail.StartTime.substring(3, 5)
+                    - var endHour = parseInt(avail.EndTime.substring(0, 2))
+                    - var endMin = avail.EndTime.substring(3, 5)
+                    - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
+                    - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
+                    - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
+                    - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
+                    tr(data-day="monday" data-worker-id=avail.WorkerID)
+                      td= avail.FirstName + ' ' + avail.LastName
+                      td.specialty-cell= avail.specialties || '—'
+                      td.availability-cell Available
+                      td= startDisplay + ' - ' + endDisplay
+          else
+            p.no-schedule No workers scheduled for Monday
+        #tuesdaySchedule.day-schedule(style="display: none;")
+          if availability && availability.length > 0
+            table.schedule-table
+              thead
+                tr
+                  th Worker Name
+                  th Specialties
+                  th Availability
+                  th Time
+              tbody
+                each avail in availability
+                  - var dayOfWeek = avail.DayOfWeek
+                  if dayOfWeek === 3
+                    - var startHour = parseInt(avail.StartTime.substring(0, 2))
+                    - var startMin = avail.StartTime.substring(3, 5)
+                    - var endHour = parseInt(avail.EndTime.substring(0, 2))
+                    - var endMin = avail.EndTime.substring(3, 5)
+                    - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
+                    - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
+                    - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
+                    - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
+                    tr(data-day="tuesday" data-worker-id=avail.WorkerID)
+                      td= avail.FirstName + ' ' + avail.LastName
+                      td.specialty-cell= avail.specialties || '—'
+                      td.availability-cell Available
+                      td= startDisplay + ' - ' + endDisplay
+          else
+            p.no-schedule No workers scheduled for Tuesday
+        #wednesdaySchedule.day-schedule(style="display: none;")
+          if availability && availability.length > 0
+            table.schedule-table
+              thead
+                tr
+                  th Worker Name
+                  th Specialties
+                  th Availability
+                  th Time
+              tbody
+                each avail in availability
+                  - var dayOfWeek = avail.DayOfWeek
+                  if dayOfWeek === 4
+                    - var startHour = parseInt(avail.StartTime.substring(0, 2))
+                    - var startMin = avail.StartTime.substring(3, 5)
+                    - var endHour = parseInt(avail.EndTime.substring(0, 2))
+                    - var endMin = avail.EndTime.substring(3, 5)
+                    - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
+                    - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
+                    - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
+                    - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
+                    tr(data-day="wednesday" data-worker-id=avail.WorkerID)
+                      td= avail.FirstName + ' ' + avail.LastName
+                      td.specialty-cell= avail.specialties || '—'
+                      td.availability-cell Available
+                      td= startDisplay + ' - ' + endDisplay
+          else
+            p.no-schedule No workers scheduled for Wednesday
+        #thursdaySchedule.day-schedule(style="display: none;")
+          if availability && availability.length > 0
+            table.schedule-table
+              thead
+                tr
+                  th Worker Name
+                  th Specialties
+                  th Availability
+                  th Time
+              tbody
+                each avail in availability
+                  - var dayOfWeek = avail.DayOfWeek
+                  if dayOfWeek === 5
+                    - var startHour = parseInt(avail.StartTime.substring(0, 2))
+                    - var startMin = avail.StartTime.substring(3, 5)
+                    - var endHour = parseInt(avail.EndTime.substring(0, 2))
+                    - var endMin = avail.EndTime.substring(3, 5)
+                    - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
+                    - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
+                    - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
+                    - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
+                    tr(data-day="thursday" data-worker-id=avail.WorkerID)
+                      td= avail.FirstName + ' ' + avail.LastName
+                      td.specialty-cell= avail.specialties || '—'
+                      td.availability-cell Available
+                      td= startDisplay + ' - ' + endDisplay
+          else
+            p.no-schedule No workers scheduled for Thursday
+        #fridaySchedule.day-schedule(style="display: none;")
+          if availability && availability.length > 0
+            table.schedule-table
+              thead
+                tr
+                  th Worker Name
+                  th Specialties
+                  th Availability
+                  th Time
+              tbody
+                each avail in availability
+                  - var dayOfWeek = avail.DayOfWeek
+                  if dayOfWeek === 6
+                    - var startHour = parseInt(avail.StartTime.substring(0, 2))
+                    - var startMin = avail.StartTime.substring(3, 5)
+                    - var endHour = parseInt(avail.EndTime.substring(0, 2))
+                    - var endMin = avail.EndTime.substring(3, 5)
+                    - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
+                    - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
+                    - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
+                    - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
+                    tr(data-day="friday" data-worker-id=avail.WorkerID)
+                      td= avail.FirstName + ' ' + avail.LastName
+                      td.specialty-cell= avail.specialties || '—'
+                      td.availability-cell Available
+                      td= startDisplay + ' - ' + endDisplay
+          else
+            p.no-schedule No workers scheduled for Friday
+    .homepage-content
+      h2.homepage-title Machine Status
+      if machines && machines.length > 0
+        table.machine-status-table
+          thead
             tr
-              td.machine-name-cell= machine.MachineName
-              td.status-cell
-                if machine.WorkingStatus
-                  span.status-available Available
-                else
-                  span.status-unavailable Unavailable
-    else
-      p.no-machines No machines available.
+              th Machine Name
+              th Status
+          tbody
+            each machine in machines
+              tr
+                td.machine-name-cell= machine.MachineName
+                td.status-cell
+                  if machine.WorkingStatus
+                    span.status-available Available
+                  else
+                    span.status-unavailable Unavailable
+      else
+        p.no-machines No machines available.
+
+  script.
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    let currentDayIndex = 0;
+    let weekOffset = 0; // 0 = current week, 1 = next week, -1 = previous week
+
+    function getMondayOfWeek(offset) {
+      const today = new Date();
+      let currentWeekday = today.getDay();
+      const daysSinceMonday = currentWeekday === 0 ? 6 : currentWeekday - 1;
+      let monday = new Date(today);
+      monday.setDate(today.getDate() - daysSinceMonday + offset * 7);
+      monday.setHours(0,0,0,0);
+      return monday;
+    }
+
+    function getNextWeekday(baseDate, daysToAdd) {
+      const date = new Date(baseDate);
+      let daysAdded = 0;
+      while (daysAdded < daysToAdd) {
+        date.setDate(date.getDate() + 1);
+        // Skip weekends
+        if (date.getDay() !== 0 && date.getDay() !== 6) {
+          daysAdded++;
+        }
+      }
+      return date;
+    }
+
+    function showDay(index) {
+      // Hide all schedules
+      days.forEach(day => {
+        const schedule = document.getElementById(day + 'Schedule');
+        if (schedule) schedule.style.display = 'none';
+      });
+
+      // Show selected day
+      const selectedSchedule = document.getElementById(days[index] + 'Schedule');
+      if (selectedSchedule) selectedSchedule.style.display = 'block';
+
+      // Update day name
+      document.getElementById('currentDay').textContent = dayNames[index];
+
+      // Calculate and display the date for this day
+      const monday = getMondayOfWeek(weekOffset);
+      const selectedDate = getNextWeekday(monday, index);
+      const options = { month: 'long', day: 'numeric', year: 'numeric' };
+      const formattedDate = selectedDate.toLocaleDateString('en-US', options);
+      document.getElementById('currentDate').textContent = formattedDate;
+      currentDayIndex = index;
+    }
+
+    document.getElementById('prevDay').addEventListener('click', () => {
+      if (currentDayIndex > 0) {
+        showDay(currentDayIndex - 1);
+      } else {
+        // If on Monday, go to previous Friday of previous week
+        weekOffset--;
+        showDay(4);
+      }
+    });
+
+    document.getElementById('nextDay').addEventListener('click', () => {
+      if (currentDayIndex < days.length - 1) {
+        showDay(currentDayIndex + 1);
+      } else {
+        // If on Friday, jump to next Monday of next week
+        weekOffset++;
+        showDay(0);
+      }
+    });
+
+    // Get current day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const todayDay = new Date().getDay();
+    let initialDay = 0;
+    if (todayDay >= 1 && todayDay <= 5) {
+      initialDay = todayDay - 1; // Convert to 0-4 range for Mon-Fri
+    }
+
+    showDay(initialDay);
 

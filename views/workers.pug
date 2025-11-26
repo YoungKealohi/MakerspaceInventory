@@ -18,6 +18,8 @@ block content
         th Role
         th Phone Number
         th Email
+        th Specialties
+        th Availability
         th Actions
     tbody
       each worker in workers
@@ -26,6 +28,8 @@ block content
           td= worker.IsBoss ? 'Boss' : 'Worker'
           td= worker.PhoneNumber || '—'
           td= worker.Email || '—'
+          td= worker.specialties || '—'
+          td= worker.availabilityCount > 0 ? worker.availabilityCount + ' scheduled' : '—'
           td.form
             a.button(href=`/workers/${worker.WorkerID}/edit`) Edit
             form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');")

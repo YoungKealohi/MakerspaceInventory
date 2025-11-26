@@ -20,13 +20,17 @@
 .machine-inventory-list-item {
   margin-bottom: 36px;
   padding-bottom: 18px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.machine-inventory-title {
-  color: #007298;
-  margin-bottom: 14px;
-  font-size: 1.15em;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    margin-top: 0;
+    margin-left: 0;
+    width: 100vw;
+    max-width: none;
+    overflow: visible;
+    flex-wrap: nowrap;
   text-align: left;
   margin-left: 6px;
 }
@@ -586,12 +590,49 @@ form button.delete:hover {
   background: #b52b27 !important;
 }
 
+/* Worker form sections */
+hr {
+  margin: 30px 0;
+  border: none;
+  border-top: 2px solid #ddd;
+}
+
+h2 {
+  margin-left: 20px;
+  margin-top: 30px;
+  color: #4f758b;
+}
+
+h3 {
+  margin-left: 20px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+form input[type="datetime-local"],
+form input[type="email"] {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+form input[type="datetime-local"]:focus,
+form input[type="email"]:focus {
+  outline: none;
+  border-color: #007298;
+}
+
 /* Homepage machine status table */
 .homepage-content {
-  position: absolute;
-  top: 120px;
-  left: 30px;
+  position: static;
   max-width: 500px;
+    flex: 1;
 }
 
 .homepage-title {
@@ -601,6 +642,7 @@ form button.delete:hover {
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   text-align: center;
   margin-left: 0;
+  margin-top: 0;
 }
 
 .machine-status-table {
@@ -662,6 +704,155 @@ form button.delete:hover {
   padding: 20px;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 10px;
+}
+
+/* Worker Schedule Widget */
+.schedule-widget {
+  position: static;
+  width: 700px;
+  background: transparent;
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: none;
+  flex: 0 1 48%;
+  align-self: flex-start;
+}
+
+.schedule-title {
+  color: white;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  text-align: center;
+  margin-left: 0;
+  margin-top: 0;
+}
+
+.schedule-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.day-info {
+  flex: 1;
+  text-align: center;
+}
+
+.current-day {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #4f758b;
+  margin: 0;
+}
+
+.current-date {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 5px 0 0 0;
+  font-weight: 500;
+}
+
+.nav-button {
+  background: #4f758b;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.nav-button:hover {
+  background: #3d5f73;
+}
+
+.nav-button:active {
+  background: #2d4a5a;
+}
+
+.schedule-content {
+  min-height: 200px;
+}
+
+.day-schedule {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.schedule-table thead {
+  background: #4f758b;
+  color: white;
+}
+
+.schedule-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.schedule-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.schedule-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.schedule-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.specialty-cell {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.availability-cell {
+  font-size: 0.9rem;
+  color: #28a745;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.no-schedule {
+  text-align: center;
+  padding: 40px 20px;
+  color: white;
+  font-style: italic;
+  font-size: 1.1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 

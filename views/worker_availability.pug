@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  .logout-button-container
+    a.button-logout(href="/") Log out
+
+  h1= worker.FirstName + ' ' + worker.LastName + ' - Availability Schedule'
+  
+  p 
+    a.button-nav(href=`/workers/`) Back to Workers
+
+  h2 Add New Availability
+  form(method="post", action=`/worker-availability/${worker.WorkerID}/add`)
+    div
+      label(for="Availability") Date & Time:
+      input#Availability(type="datetime-local", name="Availability", required)
+    div
+      button(type="submit") Add Availability
+
+  h2 Current Availability
+  
+  if availabilities.length === 0
+    p This worker has no availability scheduled yet.
+  else
+    table(border="1" cellpadding="6" cellspacing="0")
+      thead
+        tr
+          th Date & Time
+          th Actions
+      tbody
+        each avail in availabilities
+          tr
+            td= new Date(avail.Availability).toLocaleString()
+            td.form
+              form(method="post", action=`/worker-availability/delete/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
+                button.delete(type="submit") Remove
