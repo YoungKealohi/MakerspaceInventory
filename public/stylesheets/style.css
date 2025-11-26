@@ -628,11 +628,25 @@ form input[type="email"]:focus {
   border-color: #007298;
 }
 
+/* Dashboard flex container */
+.dashboard-flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 40px;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Homepage machine status table */
 .homepage-content {
   position: static;
   max-width: 500px;
-    flex: 1;
+  flex: 0 1 48%;
+  align-self: flex-start;
 }
 
 .homepage-title {
@@ -708,8 +722,8 @@ form input[type="email"]:focus {
 
 /* Worker Schedule Widget */
 .schedule-widget {
-  position: static;
-  width: 700px;
+  position: relative;
+  max-width: 700px;
   background: transparent;
   border-radius: 10px;
   padding: 0;
@@ -739,6 +753,9 @@ form input[type="email"]:focus {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   width: 100%;
   box-sizing: border-box;
+  position: sticky;
+  top: 115px;
+  z-index: 999;
 }
 
 .day-info {
@@ -805,6 +822,27 @@ form input[type="email"]:focus {
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
+  table-layout: fixed;
+}
+
+.schedule-table th:nth-child(1),
+.schedule-table td:nth-child(1) {
+  width: 25%;
+}
+
+.schedule-table th:nth-child(2),
+.schedule-table td:nth-child(2) {
+  width: 25%;
+}
+
+.schedule-table th:nth-child(3),
+.schedule-table td:nth-child(3) {
+  width: 20%;
+}
+
+.schedule-table th:nth-child(4),
+.schedule-table td:nth-child(4) {
+  width: 30%;
 }
 
 .schedule-table thead {
@@ -814,7 +852,7 @@ form input[type="email"]:focus {
 
 .schedule-table th {
   padding: 12px 15px;
-  text-align: left;
+  text-align: center;
   font-weight: bold;
   font-size: 1rem;
 }
@@ -822,6 +860,7 @@ form input[type="email"]:focus {
 .schedule-table td {
   padding: 12px 15px;
   border-bottom: 1px solid #ddd;
+  text-align: center;
 }
 
 .schedule-table tbody tr:last-child td {

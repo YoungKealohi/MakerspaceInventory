@@ -17,18 +17,21 @@ router.get('/', async (req, res) => {
             ORDER BY MachineName
         `);
         
-        // Fetch worker availability for the current week with specialties
+        // Fetch worker availability for multiple weeks (4 weeks back, 8 weeks forward)
         // This query expands availability ranges to show workers on each day they're available
-        // Get JavaScript date for current week calculation
         const now = new Date();
-        const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const monday = new Date(now);
-        // Calculate days to subtract to get to Monday
+        const dayOfWeek = now.getDay();
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        monday.setDate(now.getDate() - daysToMonday);
         
-        // Format as YYYY-MM-DD
-        const mondayStr = monday.toISOString().split('T')[0];
+        // Start date: 4 weeks before current Monday
+        const startDate = new Date(now);
+        startDate.setDate(now.getDate() - daysToMonday - (4 * 7));
+        const startDateStr = startDate.toISOString().split('T')[0];
+        
+        // End date: 8 weeks after current Monday
+        const endDate = new Date(now);
+        endDate.setDate(now.getDate() - daysToMonday + (8 * 7));
+        const endDateStr = endDate.toISOString().split('T')[0];
         
         const [availability] = await pool.query(`
             WITH RECURSIVE dates AS (
@@ -36,7 +39,7 @@ router.get('/', async (req, res) => {
                 UNION ALL
                 SELECT DATE_ADD(date, INTERVAL 1 DAY)
                 FROM dates
-                WHERE date < DATE_ADD(?, INTERVAL 4 DAY)
+                WHERE date <= ?
             )
             SELECT DISTINCT
                 w.WorkerID,
@@ -46,6 +49,7 @@ router.get('/', async (req, res) => {
                 wa.ToDate,
                 wa.StartTime,
                 wa.EndTime,
+                d.date as AvailableDate,
                 DAYOFWEEK(d.date) as DayOfWeek,
                 GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') as specialties
             FROM dates d
@@ -57,7 +61,17 @@ router.get('/', async (req, res) => {
               AND DAYOFWEEK(d.date) BETWEEN 2 AND 6
             GROUP BY w.WorkerID, wa.WorkerAvailabilityID, d.date, wa.FromDate, wa.ToDate, wa.StartTime, wa.EndTime
             ORDER BY d.date, w.LastName, w.FirstName
-        `, [mondayStr, mondayStr]);
+        `, [startDateStr, endDateStr]);
+        
+        console.log('=== INDEX ROUTE DEBUG ===');
+        console.log('Date range:', startDateStr, 'to', endDateStr);
+        console.log('Availability records found:', availability.length);
+        if (availability.length > 0) {
+            console.log('First 3 records:');
+            availability.slice(0, 3).forEach(a => {
+                console.log(`  ${a.FirstName} ${a.LastName} - ${a.AvailableDate} (${a.DayOfWeek})`);
+            });
+        }
         
         res.render('index', { 
             title: "Welcome", 
