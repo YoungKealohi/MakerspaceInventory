@@ -105,7 +105,7 @@ block content
               tr
                 - var dayNames = {2: 'Monday', 3: 'Tuesday', 4: 'Wednesday', 5: 'Thursday', 6: 'Friday'}
                 td= dayNames[avail.DayOfWeek] || avail.DayOfWeek
-                td= avail.StartTime.substring(0, 5) + ' - ' + avail.EndTime.substring(0, 5)
+                td= formatTime(avail.StartTime) + ' - ' + formatTime(avail.EndTime)
                 td.form
                   form(method="post", action=`/workers/${worker.WorkerID}/delete-availability/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
                     button.delete(type="submit") Remove

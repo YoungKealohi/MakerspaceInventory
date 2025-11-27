@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 
         // Query workers available on the current day of week
         const [schedule] = await pool.query(`
-            SELECT w.WorkerID, w.FirstName, w.LastName,
+            SELECT w.WorkerID, w.FirstName,
                    wa.StartTime, wa.EndTime, wa.DayOfWeek,
                    GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') AS specialties
             FROM Worker w

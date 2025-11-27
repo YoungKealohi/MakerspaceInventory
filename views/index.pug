@@ -24,7 +24,7 @@ block content
                     span.status-unavailable(style="color: red; font-weight: bold;") Unavailable
       else
         p.no-machines No machines available.
-    .worker-schedule-panel(style="flex: 1; min-width: 320px; max-width: 480px; display: flex; flex-direction: column; align-items: center;")
+    .worker-schedule-panel(style="flex: 1; min-width: 400px; max-width: 600px; display: flex; flex-direction: column; align-items: center;")
       h2.schedule-title Worker Schedule
       .schedule-nav(style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 8px;")
         button#prevDay.nav-button(type="button") ◀ Previous Day
@@ -41,7 +41,7 @@ block content
           tbody
             each worker in schedule
               tr
-                td.worker-name-cell= worker.FirstName + ' ' + worker.LastName
+                td.worker-name-cell= worker.FirstName
                 td.worker-specialty-cell= worker.specialties || '—'
                 td.worker-time-cell= worker.StartTime + ' - ' + worker.EndTime
       else
@@ -106,7 +106,7 @@ block content
             data.schedule.forEach(worker => {
               tableHTML += `
                 <tr>
-                  <td class="worker-name-cell">${worker.FirstName} ${worker.LastName}</td>
+                  <td class="worker-name-cell">${worker.FirstName}</td>
                   <td class="worker-specialty-cell">${worker.specialties || '—'}</td>
                   <td class="worker-time-cell">${worker.StartTime} - ${worker.EndTime}</td>
                 </tr>
@@ -149,3 +149,22 @@ block content
       updateSchedule(newOffset);
     });
 
+  .makerspace-hours(style="text-align: center; margin: 32px auto; max-width: 400px; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);")
+    h2(style="margin-top: 0;") Makerspace Hours
+    table(style="margin: 0 auto; border: none;")
+      tbody
+        tr
+          td(style="text-align: left; padding: 8px; font-weight: bold;") Monday:
+          td(style="text-align: right; padding: 8px;") 9:30am-6:30pm
+        tr
+          td(style="text-align: left; padding: 8px; font-weight: bold;") Tuesday:
+          td(style="text-align: right; padding: 8px;") 9am-8pm
+        tr
+          td(style="text-align: left; padding: 8px; font-weight: bold;") Wednesday:
+          td(style="text-align: right; padding: 8px;") 9am-5pm
+        tr
+          td(style="text-align: left; padding: 8px; font-weight: bold;") Thursday:
+          td(style="text-align: right; padding: 8px;") 11:30am-8pm
+        tr
+          td(style="text-align: left; padding: 8px; font-weight: bold;") Friday:
+          td(style="text-align: right; padding: 8px;") 9am-7pm

@@ -29,7 +29,7 @@ block content
           td= worker.PhoneNumber || '—'
           td= worker.Email || '—'
           td= worker.specialties || '—'
-          td= worker.availabilityDisplay
+          td!= worker.availabilityDisplay
           td.form
             a.button(href=`/workers/${worker.WorkerID}/edit`) Edit
             form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');")

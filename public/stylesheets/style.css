@@ -227,12 +227,18 @@ table {
 /* Allow supply name column to wrap and be wider */
 td, th {
   word-break: break-word;
+  padding: 8px;
 }
 
 td.form {
-  display: flex;
-  gap: 5px;
-  align-items: center;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+
+td.form > * {
+  display: inline-block;
+  margin: 0 2.5px;
 }
 
 td.form form {
@@ -884,12 +890,22 @@ form input[type="email"]:focus {
 
 .schedule-table th:nth-child(1),
 .schedule-table td:nth-child(1) {
-  width: 22%;
+  width: 12%;
 }
 
 .schedule-table th:nth-child(2),
 .schedule-table td:nth-child(2) {
-  width: 28%;
+  width: 38%;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.schedule-table th:nth-child(3),
+.schedule-table td:nth-child(3) {
+  width: 50%;
+  white-space: nowrap;
 }
 
 .schedule-table th:nth-child(3),
@@ -951,6 +967,13 @@ form input[type="email"]:focus {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Workers table - limit availability column width */
+table td:nth-child(6) {
+  max-width: 250px;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 

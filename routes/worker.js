@@ -2,6 +2,15 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db/pool");
 
+// Helper function to format time from 24-hour to 12-hour AM/PM format
+function formatTime(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${minutes} ${ampm}`;
+}
+
 // GET /workers - List all workers
 router.get("/", async (req, res) => {
   try {
@@ -27,9 +36,9 @@ router.get("/", async (req, res) => {
       `, [worker.WorkerID]);
 
       if (availability.length > 0) {
-        // Format as "Mon 08:00-12:00, Tue 09:00-13:00, ..."
+        // Format as "Mon 08:00-12:00<br>Tue 09:00-13:00<br>..."
         const dayNames = {2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri'};
-        worker.availabilityDisplay = availability.map(a => `${dayNames[a.DayOfWeek] || a.DayOfWeek} ${a.StartTime.substring(0,5)}-${a.EndTime.substring(0,5)}`).join(', ');
+        worker.availabilityDisplay = availability.map(a => `${dayNames[a.DayOfWeek] || a.DayOfWeek} ${formatTime(a.StartTime)}-${formatTime(a.EndTime)}`).join('<br>');
       } else {
         worker.availabilityDisplay = '—';
       }
@@ -51,6 +60,10 @@ router.get("/new", (req, res) => {
   res.render("worker_form", {
     title: "Add Worker",
     worker: null,
+    machines: [],
+    specialties: [],
+    availabilities: [],
+    formatTime: formatTime,
     formAction: "/workers/new",
     submitLabel: "Add Worker"
   });
@@ -103,6 +116,7 @@ router.get("/:id/edit", async (req, res) => {
       machines: machines,
       specialties: specialties,
       availabilities: availabilities,
+      formatTime: formatTime,
       formAction: `/workers/${req.params.id}/edit`,
       submitLabel: "Update Worker"
     });
