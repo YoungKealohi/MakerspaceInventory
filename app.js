@@ -7,8 +7,6 @@ const locationsRouter = require("./routes/locations");
 const startInventoryRouter = require("./routes/start_inventory");
 const scheduleRouter = require("./routes/schedule");
 const workerRouter = require("./routes/worker");
-const workerSpecialtyRouter = require("./routes/worker_specialty");
-const workerAvailabilityRouter = require("./routes/worker_availability");
 
 const session = require('express-session');
 
@@ -41,8 +39,6 @@ app.use('/machines', machinesRouter);
 app.use('/', startInventoryRouter);
 app.use('/schedule', scheduleRouter);
 app.use('/workers', workerRouter);
-app.use('/worker-specialty', workerSpecialtyRouter);
-app.use('/worker-availability', workerAvailabilityRouter);
 
 app.listen(port, () => {
  console.log(`Example app listening at http://localhost:${port}`);
