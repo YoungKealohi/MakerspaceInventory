@@ -85,18 +85,10 @@ block content
             option(value="6") Friday
         div
           label(for="StartTime") Start Time:
-          select#StartTime(name="StartTime", required)
-            option(value="") -- Select Start Time --
-            each hour in [8,9,10,11,12,13,14,15,16,17]
-              - var display = (hour < 12 ? hour + ':00 AM' : (hour === 12 ? '12:00 PM' : (hour-12) + ':00 PM'))
-              option(value=(hour < 10 ? '0' + hour : '' + hour) + ':00:00')= display
+          input#StartTime(type="time", name="StartTime", required)
         div
           label(for="EndTime") End Time:
-          select#EndTime(name="EndTime", required)
-            option(value="") -- Select End Time --
-            each hour in [9,10,11,12,13,14,15,16,17,18]
-              - var display = (hour < 12 ? hour + ':00 AM' : (hour === 12 ? '12:00 PM' : (hour-12) + ':00 PM'))
-              option(value=(hour < 10 ? '0' + hour : '' + hour) + ':00:00')= display
+          input#EndTime(type="time", name="EndTime", required)
         div
           button(type="submit") Add Availability
     
