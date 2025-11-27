@@ -3,12 +3,12 @@ extends layout
 block content
   .login-button-container
     a.button-login-home(href="/login") Login
-  
-  .dashboard-flex
-    .homepage-content
+
+  .top-row-flex(style="display: flex; flex-direction: row; align-items: flex-start; justify-content: center; gap: 48px; margin-top: 32px;")
+    .machine-status-panel(style="flex: 1; min-width: 320px; max-width: 480px; display: flex; flex-direction: column; align-items: center;")
       h2.homepage-title Machine Status
       if machines && machines.length > 0
-        table.machine-status-table
+        table.machine-status-table(style="margin: 0 auto;")
           thead
             tr
               th Machine Name
@@ -19,318 +19,133 @@ block content
                 td.machine-name-cell= machine.MachineName
                 td.status-cell
                   if machine.WorkingStatus
-                    span.status-available Available
+                    span.status-available(style="color: green; font-weight: bold;") Available
                   else
-                    span.status-unavailable Unavailable
+                    span.status-unavailable(style="color: red; font-weight: bold;") Unavailable
       else
         p.no-machines No machines available.
-    .schedule-widget
+    .worker-schedule-panel(style="flex: 1; min-width: 320px; max-width: 480px; display: flex; flex-direction: column; align-items: center;")
       h2.schedule-title Worker Schedule
-      .schedule-nav
-        button#prevDay.nav-button ← Previous
+      .schedule-nav(style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 8px;")
+        button#prevDay.nav-button(type="button") ← Previous
         .day-info
-          h3#currentDay.current-day Monday
-          p#currentDate.current-date
-        button#nextDay.nav-button Next →
-      .schedule-content
-        #mondaySchedule.day-schedule(data-date="")
-          - var mondayWorkers = availability ? availability.filter(a => a.DayOfWeek === 2) : []
-          if mondayWorkers.length > 0
-            table.schedule-table
-              thead
-                tr
-                  th Worker Name
-                  th Specialties
-                  th Availability
-                  th Time
-              tbody
-                each avail in mondayWorkers
-                  - var startHour = parseInt(avail.StartTime.substring(0, 2))
-                  - var startMin = avail.StartTime.substring(3, 5)
-                  - var endHour = parseInt(avail.EndTime.substring(0, 2))
-                  - var endMin = avail.EndTime.substring(3, 5)
-                  - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
-                  - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
-                  - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
-                  - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
-                  tr(data-day="monday" data-worker-id=avail.WorkerID)
-                    td= avail.FirstName + ' ' + avail.LastName
-                    td.specialty-cell= avail.specialties || '—'
-                    td.availability-cell Available
-                    td= startDisplay + ' - ' + endDisplay
-          else
-            p.no-schedule No workers scheduled for Monday
-        #tuesdaySchedule.day-schedule(style="display: none;" data-date="")
-          - var tuesdayWorkers = availability ? availability.filter(a => a.DayOfWeek === 3) : []
-          if tuesdayWorkers.length > 0
-            table.schedule-table
-              thead
-                tr
-                  th Worker Name
-                  th Specialties
-                  th Availability
-                  th Time
-              tbody
-                each avail in tuesdayWorkers
-                  - var startHour = parseInt(avail.StartTime.substring(0, 2))
-                  - var startMin = avail.StartTime.substring(3, 5)
-                  - var endHour = parseInt(avail.EndTime.substring(0, 2))
-                  - var endMin = avail.EndTime.substring(3, 5)
-                  - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
-                  - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
-                  - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
-                  - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
-                  tr(data-day="tuesday" data-worker-id=avail.WorkerID)
-                    td= avail.FirstName + ' ' + avail.LastName
-                    td.specialty-cell= avail.specialties || '—'
-                    td.availability-cell Available
-                    td= startDisplay + ' - ' + endDisplay
-          else
-            p.no-schedule No workers scheduled for Tuesday
-        #wednesdaySchedule.day-schedule(style="display: none;" data-date="")
-          - var wednesdayWorkers = availability ? availability.filter(a => a.DayOfWeek === 4) : []
-          if wednesdayWorkers.length > 0
-            table.schedule-table
-              thead
-                tr
-                  th Worker Name
-                  th Specialties
-                  th Availability
-                  th Time
-              tbody
-                each avail in wednesdayWorkers
-                  - var startHour = parseInt(avail.StartTime.substring(0, 2))
-                  - var startMin = avail.StartTime.substring(3, 5)
-                  - var endHour = parseInt(avail.EndTime.substring(0, 2))
-                  - var endMin = avail.EndTime.substring(3, 5)
-                  - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
-                  - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
-                  - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
-                  - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
-                  tr(data-day="wednesday" data-worker-id=avail.WorkerID)
-                    td= avail.FirstName + ' ' + avail.LastName
-                    td.specialty-cell= avail.specialties || '—'
-                    td.availability-cell Available
-                    td= startDisplay + ' - ' + endDisplay
-          else
-            p.no-schedule No workers scheduled for Wednesday
-        #thursdaySchedule.day-schedule(style="display: none;" data-date="")
-          - var thursdayWorkers = availability ? availability.filter(a => a.DayOfWeek === 5) : []
-          if thursdayWorkers.length > 0
-            table.schedule-table
-              thead
-                tr
-                  th Worker Name
-                  th Specialties
-                  th Availability
-                  th Time
-              tbody
-                each avail in thursdayWorkers
-                  - var startHour = parseInt(avail.StartTime.substring(0, 2))
-                  - var startMin = avail.StartTime.substring(3, 5)
-                  - var endHour = parseInt(avail.EndTime.substring(0, 2))
-                  - var endMin = avail.EndTime.substring(3, 5)
-                  - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
-                  - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
-                  - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
-                  - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
-                  tr(data-day="thursday" data-worker-id=avail.WorkerID)
-                    td= avail.FirstName + ' ' + avail.LastName
-                    td.specialty-cell= avail.specialties || '—'
-                    td.availability-cell Available
-                    td= startDisplay + ' - ' + endDisplay
-          else
-            p.no-schedule No workers scheduled for Thursday
-        #fridaySchedule.day-schedule(style="display: none;" data-date="")
-          - var fridayWorkers = availability ? availability.filter(a => a.DayOfWeek === 6) : []
-          if fridayWorkers.length > 0
-            table.schedule-table
-              thead
-                tr
-                  th Worker Name
-                  th Specialties
-                  th Availability
-                  th Time
-              tbody
-                each avail in fridayWorkers
-                  - var startHour = parseInt(avail.StartTime.substring(0, 2))
-                  - var startMin = avail.StartTime.substring(3, 5)
-                  - var endHour = parseInt(avail.EndTime.substring(0, 2))
-                  - var endMin = avail.EndTime.substring(3, 5)
-                  - var startPeriod = startHour >= 12 ? 'PM' : 'AM'
-                  - var endPeriod = endHour >= 12 ? 'PM' : 'AM'
-                  - var startDisplay = (startHour % 12 || 12) + ':' + startMin + ' ' + startPeriod
-                  - var endDisplay = (endHour % 12 || 12) + ':' + endMin + ' ' + endPeriod
-                  tr(data-day="friday" data-worker-id=avail.WorkerID)
-                    td= avail.FirstName + ' ' + avail.LastName
-                    td.specialty-cell= avail.specialties || '—'
-                    td.availability-cell Available
-                    td= startDisplay + ' - ' + endDisplay
-          else
-            p.no-schedule No workers scheduled for Friday
+          span#currentDay.schedule-day-label= currentWeekday
+        button#nextDay.nav-button(type="button") Next →
+      if schedule && schedule.length > 0
+        table.schedule-table(style="margin: 0 auto;")
+          thead
+            tr
+              th Name
+              th Specialty
+              th Time
+          tbody
+            each worker in schedule
+              tr
+                td.worker-name-cell= worker.FirstName + ' ' + worker.LastName
+                td.worker-specialty-cell= worker.specialties || '—'
+                td.worker-time-cell= worker.StartTime + ' - ' + worker.EndTime
+      else
+        p.no-schedule No workers scheduled today.
 
   script.
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    let currentDayIndex = 0;
-    let weekOffset = 0;
+    let currentDayOffset = 0; // 0 = today, -1 = yesterday, +1 = tomorrow, etc.
     
-    // Parse availability data from server
-    const availabilityData = !{JSON.stringify(availability || [])};
-    
-    console.log('=== PAGE LOADED ===');
-    console.log('Total availability records:', availabilityData.length);
-    console.log('Availability data:', availabilityData);
-    if (availabilityData.length > 0) {
-      console.log('First record:', availabilityData[0]);
-      console.log('First record AvailableDate:', availabilityData[0].AvailableDate);
-    }
-
-    function getMondayOfWeek(offset) {
-      const today = new Date();
-      let currentWeekday = today.getDay();
-      const daysSinceMonday = currentWeekday === 0 ? 6 : currentWeekday - 1;
-      let monday = new Date(today);
-      monday.setDate(today.getDate() - daysSinceMonday + offset * 7);
-      monday.setHours(0,0,0,0);
-      return monday;
-    }
-
-    function getNextWeekday(baseDate, daysToAdd) {
-      const date = new Date(baseDate);
-      let daysAdded = 0;
-      while (daysAdded < daysToAdd) {
-        date.setDate(date.getDate() + 1);
-        if (date.getDay() !== 0 && date.getDay() !== 6) {
-          daysAdded++;
+    // Helper to skip weekends
+    function getNextWeekdayOffset(currentOffset, direction) {
+      let newOffset = currentOffset;
+      
+      // Keep moving in the direction until we hit a weekday
+      do {
+        newOffset += direction;
+        const today = new Date();
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + newOffset);
+        const dayOfWeek = targetDate.getDay();
+        
+        // Check if it's a weekday (1=Monday to 5=Friday)
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+          return newOffset;
         }
-      }
-      return date;
+      } while (true);
     }
-
-    function formatTime(timeStr) {
-      const hour = parseInt(timeStr.substring(0, 2));
-      const min = timeStr.substring(3, 5);
-      const period = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour % 12 || 12;
-      return displayHour + ':' + min + ' ' + period;
+    
+    function updateSchedule(dayOffset) {
+      currentDayOffset = dayOffset;
+      
+      // Fetch schedule for the selected day
+      fetch(`/api/schedule?dayOffset=${dayOffset}`)
+        .then(response => response.json())
+        .then(data => {
+          // Update the day label
+          document.getElementById('currentDay').textContent = data.weekdayName;
+          
+          // Update the schedule table
+          const schedulePanel = document.querySelector('.worker-schedule-panel');
+          const existingTable = schedulePanel.querySelector('.schedule-table');
+          const existingMessage = schedulePanel.querySelector('.no-schedule');
+          
+          if (data.schedule && data.schedule.length > 0) {
+            // Remove "no schedule" message if it exists
+            if (existingMessage) {
+              existingMessage.remove();
+            }
+            
+            // Build the table HTML
+            let tableHTML = `
+              <table class="schedule-table" style="margin: 0 auto;">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Specialty</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            data.schedule.forEach(worker => {
+              tableHTML += `
+                <tr>
+                  <td class="worker-name-cell">${worker.FirstName} ${worker.LastName}</td>
+                  <td class="worker-specialty-cell">${worker.specialties || '—'}</td>
+                  <td class="worker-time-cell">${worker.StartTime} - ${worker.EndTime}</td>
+                </tr>
+              `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            
+            // Replace or insert the table
+            if (existingTable) {
+              existingTable.outerHTML = tableHTML;
+            } else {
+              schedulePanel.insertAdjacentHTML('beforeend', tableHTML);
+            }
+          } else {
+            // Remove table if it exists
+            if (existingTable) {
+              existingTable.remove();
+            }
+            
+            // Show "no schedule" message
+            if (!existingMessage) {
+              schedulePanel.insertAdjacentHTML('beforeend', '<p class="no-schedule">No workers scheduled today.</p>');
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching schedule:', error);
+        });
     }
-
-    function renderSchedule(scheduleId, targetDateStr) {
-      const container = document.getElementById(scheduleId);
-      if (!container) return;
-      
-      console.log('renderSchedule called for', scheduleId, 'with target date:', targetDateStr);
-      console.log('availabilityData:', availabilityData);
-      
-      // Filter workers for this specific date
-      const workersForDate = availabilityData.filter(w => {
-        // AvailableDate is already a string in YYYY-MM-DD format
-        const availDate = w.AvailableDate;
-        console.log('Comparing', availDate, 'with', targetDateStr, ':', availDate === targetDateStr);
-        return availDate === targetDateStr;
-      });
-      
-      console.log('Workers found for', targetDateStr, ':', workersForDate.length);
-
-      // Clear existing content
-      container.innerHTML = '';
-
-      if (workersForDate.length === 0) {
-        const noSchedule = document.createElement('p');
-        noSchedule.className = 'no-schedule';
-        noSchedule.textContent = 'No workers scheduled for ' + dayNames[days.indexOf(scheduleId.replace('Schedule', ''))];
-        container.appendChild(noSchedule);
-        return;
-      }
-
-      // Create table
-      const table = document.createElement('table');
-      table.className = 'schedule-table';
-      
-      const thead = document.createElement('thead');
-      thead.innerHTML = '<tr><th>Worker Name</th><th>Specialties</th><th>Availability</th><th>Time</th></tr>';
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      workersForDate.forEach(worker => {
-        const row = document.createElement('tr');
-        row.dataset.workerId = worker.WorkerID;
-        
-        const startTime = formatTime(worker.StartTime);
-        const endTime = formatTime(worker.EndTime);
-        
-        row.innerHTML = `
-          <td>${worker.FirstName} ${worker.LastName}</td>
-          <td class="specialty-cell">${worker.specialties || '—'}</td>
-          <td class="availability-cell">Available</td>
-          <td>${startTime} - ${endTime}</td>
-        `;
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
-      container.appendChild(table);
-    }
-
-    function showDay(index) {
-      console.log('=== showDay called ===');
-      console.log('index:', index, 'weekOffset:', weekOffset);
-      
-      // Hide all schedules
-      days.forEach(day => {
-        const schedule = document.getElementById(day + 'Schedule');
-        if (schedule) schedule.style.display = 'none';
-      });
-
-      // Calculate the target date
-      const monday = getMondayOfWeek(weekOffset);
-      console.log('Monday of week:', monday.toISOString().split('T')[0]);
-      
-      const selectedDate = getNextWeekday(monday, index);
-      const targetDateStr = selectedDate.toISOString().split('T')[0];
-      console.log('Target date:', targetDateStr, 'for day:', dayNames[index]);
-
-      // Update day name and date display
-      document.getElementById('currentDay').textContent = dayNames[index];
-      const options = { month: 'long', day: 'numeric', year: 'numeric' };
-      document.getElementById('currentDate').textContent = selectedDate.toLocaleDateString('en-US', options);
-
-      // Render schedule for the selected date
-      const scheduleId = days[index] + 'Schedule';
-      console.log('Calling renderSchedule for:', scheduleId);
-      renderSchedule(scheduleId, targetDateStr);
-
-      // Show selected day
-      const selectedSchedule = document.getElementById(scheduleId);
-      if (selectedSchedule) selectedSchedule.style.display = 'block';
-
-      currentDayIndex = index;
-    }
-
+    
+    // Button event listeners
     document.getElementById('prevDay').addEventListener('click', () => {
-      if (currentDayIndex > 0) {
-        showDay(currentDayIndex - 1);
-      } else {
-        weekOffset--;
-        showDay(4);
-      }
+      const newOffset = getNextWeekdayOffset(currentDayOffset, -1);
+      updateSchedule(newOffset);
     });
-
+    
     document.getElementById('nextDay').addEventListener('click', () => {
-      if (currentDayIndex < days.length - 1) {
-        showDay(currentDayIndex + 1);
-      } else {
-        weekOffset++;
-        showDay(0);
-      }
+      const newOffset = getNextWeekdayOffset(currentDayOffset, 1);
+      updateSchedule(newOffset);
     });
-
-    // Initialize to current day
-    const todayDay = new Date().getDay();
-    let initialDay = 0;
-    if (todayDay >= 1 && todayDay <= 5) {
-      initialDay = todayDay - 1;
-    }
-
-    showDay(initialDay);
 

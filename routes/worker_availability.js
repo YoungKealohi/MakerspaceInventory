@@ -15,12 +15,12 @@ router.get("/:workerId", async (req, res) => {
     const worker = workers[0];
     
     // Get worker's availability
-    const [availabilities] = await pool.query(`
-      SELECT * 
-      FROM WorkerAvailability 
-      WHERE WorkerID = ?
-      ORDER BY FromDate DESC, StartTime
-    `, [workerId]);
+      const [availabilities] = await pool.query(`
+        SELECT * 
+        FROM WorkerAvailability 
+        WHERE WorkerID = ?
+        ORDER BY DayOfWeek ASC, StartTime ASC
+      `, [workerId]);
     
     res.render("worker_availability", {
       title: `${worker.FirstName} ${worker.LastName} - Availability`,
@@ -37,10 +37,10 @@ router.get("/:workerId", async (req, res) => {
 // POST /worker-availability/:workerId/add - Add availability
 router.post("/:workerId/add", async (req, res) => {
   try {
-    const { Availability } = req.body;
+    const { DayOfWeek, StartTime, EndTime } = req.body;
     await pool.query(
-      "INSERT INTO WorkerAvailability (WorkerID, Availability) VALUES (?, ?)",
-      [req.params.workerId, Availability]
+      "INSERT INTO WorkerAvailability (WorkerID, DayOfWeek, StartTime, EndTime) VALUES (?, ?, ?, ?)",
+      [req.params.workerId, DayOfWeek, StartTime, EndTime]
     );
     res.redirect(`/worker-availability/${req.params.workerId}`);
   } catch (err) {

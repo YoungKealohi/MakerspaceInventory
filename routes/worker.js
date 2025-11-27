@@ -16,30 +16,25 @@ router.get("/", async (req, res) => {
       GROUP BY w.WorkerID
       ORDER BY w.LastName, w.FirstName
     `);
-    
-    // Get availability for each worker
+
+    // Get per-day availability for each worker
     for (let worker of workers) {
       const [availability] = await pool.query(`
-        SELECT FromDate, ToDate, StartTime, EndTime
+        SELECT DayOfWeek, StartTime, EndTime
         FROM WorkerAvailability
         WHERE WorkerID = ?
-        ORDER BY FromDate DESC
+        ORDER BY DayOfWeek ASC, StartTime ASC
       `, [worker.WorkerID]);
-      
+
       if (availability.length > 0) {
-        // Format availability as "Nov 24 - Nov 28"
-        const avail = availability[0];
-        const fromDate = new Date(avail.FromDate);
-        const toDate = new Date(avail.ToDate);
-        const dateOptions = { month: 'short', day: 'numeric' };
-        const fromStr = fromDate.toLocaleDateString('en-US', dateOptions);
-        const toStr = toDate.toLocaleDateString('en-US', dateOptions);
-        worker.availabilityDisplay = `${fromStr} - ${toStr}`;
+        // Format as "Mon 08:00-12:00, Tue 09:00-13:00, ..."
+        const dayNames = {2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri'};
+        worker.availabilityDisplay = availability.map(a => `${dayNames[a.DayOfWeek] || a.DayOfWeek} ${a.StartTime.substring(0,5)}-${a.EndTime.substring(0,5)}`).join(', ');
       } else {
         worker.availabilityDisplay = '—';
       }
     }
-    
+
     res.render("workers", {
       title: "Workers",
       workers: workers,
@@ -96,11 +91,11 @@ router.get("/:id/edit", async (req, res) => {
     `, [req.params.id]);
     
     // Get worker's availability
-    const [availabilities] = await pool.query(`
-      SELECT * FROM WorkerAvailability 
-      WHERE WorkerID = ?
-      ORDER BY FromDate DESC, StartTime DESC
-    `, [req.params.id]);
+      const [availabilities] = await pool.query(`
+        SELECT * FROM WorkerAvailability 
+        WHERE WorkerID = ?
+        ORDER BY DayOfWeek ASC, StartTime ASC
+      `, [req.params.id]);
     
     res.render("worker_form", {
       title: "Edit Worker",
@@ -172,10 +167,10 @@ router.post("/:workerId/delete-specialty/:specialtyId", async (req, res) => {
 // POST /workers/:id/add-availability - Add availability
 router.post("/:id/add-availability", async (req, res) => {
   try {
-    const { FromDate, ToDate, StartTime, EndTime } = req.body;
+    const { DayOfWeek, StartTime, EndTime } = req.body;
     await pool.query(
-      "INSERT INTO WorkerAvailability (WorkerID, FromDate, ToDate, StartTime, EndTime) VALUES (?, ?, ?, ?, ?)",
-      [req.params.id, FromDate, ToDate, StartTime, EndTime]
+      "INSERT INTO WorkerAvailability (WorkerID, DayOfWeek, StartTime, EndTime) VALUES (?, ?, ?, ?)",
+      [req.params.id, DayOfWeek, StartTime, EndTime]
     );
     res.redirect(`/workers/${req.params.id}/edit`);
   } catch (err) {

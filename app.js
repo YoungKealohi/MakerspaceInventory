@@ -12,8 +12,6 @@ const workerAvailabilityRouter = require("./routes/worker_availability");
 
 const session = require('express-session');
 
-
-
 const app = express();
 const port = 3000;
 app.use(express.json());
@@ -33,32 +31,18 @@ app.use(session({
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
+
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use('/', indexRouter);
-
-
 app.use('/locations', locationsRouter);
-app.use('/machines', suppliesRouter);
+app.use('/supply', suppliesRouter);
 app.use('/machines', machinesRouter);
 app.use('/', startInventoryRouter);
 app.use('/schedule', scheduleRouter);
 app.use('/workers', workerRouter);
 app.use('/worker-specialty', workerSpecialtyRouter);
 app.use('/worker-availability', workerAvailabilityRouter);
-
-/*
-app.use(async (req, res, next) => {
-  try {
-    const [rows] = await pool.query("SELECT MachineID, MachineName FROM Machine");
-    res.locals.machines = rows;
-    next();
-  } catch (err) {
-    console.error(err);
-    res.locals.machines = [];
-    next();
-  }
-});
-*/
 
 app.listen(port, () => {
  console.log(`Example app listening at http://localhost:${port}`);

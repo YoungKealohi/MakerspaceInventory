@@ -2,6 +2,15 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db/pool");
 
+// Helper function to format time from 24-hour to 12-hour AM/PM format
+function formatTime(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${minutes} ${ampm}`;
+}
+
 // Hardcoded users
 const users = [
     { username: 'admin', password: 'admin123' },
@@ -11,82 +20,113 @@ const users = [
 router.get('/', async (req, res) => {
     try {
         // Fetch all machines with their status
-        const [machines] = await pool.query(`
-            SELECT MachineID, MachineName, WorkingStatus, Model, SerialNumber 
-            FROM Machine 
-            ORDER BY MachineName
-        `);
+        const [machines] = await pool.query('SELECT * FROM Machine ORDER BY MachineName');
+
+        // Fetch today's worker schedule (name, specialty, availability, time)
+        let today = new Date();
+        let todayDayOfWeek = today.getDay(); // JavaScript: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, etc.
         
-        // Fetch worker availability for multiple weeks (4 weeks back, 8 weeks forward)
-        // This query expands availability ranges to show workers on each day they're available
-        const now = new Date();
-        const dayOfWeek = now.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        // If today is weekend, show Monday's schedule instead
+        if (todayDayOfWeek === 0) { // Sunday, show Monday
+            today.setDate(today.getDate() + 1);
+            todayDayOfWeek = 1;
+        } else if (todayDayOfWeek === 6) { // Saturday, show Monday
+            today.setDate(today.getDate() + 2);
+            todayDayOfWeek = 1;
+        }
         
-        // Start date: 4 weeks before current Monday
-        const startDate = new Date(now);
-        startDate.setDate(now.getDate() - daysToMonday - (4 * 7));
-        const startDateStr = startDate.toISOString().split('T')[0];
+        // Convert JavaScript day (0-6) to MySQL DAYOFWEEK (1-7): 1=Sunday, 2=Monday, etc.
+        const mysqlDayOfWeek = todayDayOfWeek + 1;
         
-        // End date: 8 weeks after current Monday
-        const endDate = new Date(now);
-        endDate.setDate(now.getDate() - daysToMonday + (8 * 7));
-        const endDateStr = endDate.toISOString().split('T')[0];
-        
-        const [availability] = await pool.query(`
-            WITH RECURSIVE dates AS (
-                SELECT ? as date
-                UNION ALL
-                SELECT DATE_ADD(date, INTERVAL 1 DAY)
-                FROM dates
-                WHERE date <= ?
-            )
-            SELECT DISTINCT
-                w.WorkerID,
-                w.FirstName,
-                w.LastName,
-                wa.FromDate,
-                wa.ToDate,
-                wa.StartTime,
-                wa.EndTime,
-                d.date as AvailableDate,
-                DAYOFWEEK(d.date) as DayOfWeek,
-                GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') as specialties
-            FROM dates d
-            CROSS JOIN Worker w
+        // Get current weekday name
+        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentWeekday = weekdayNames[todayDayOfWeek];
+
+        // Query workers available on the current day of week
+        const [schedule] = await pool.query(`
+            SELECT w.WorkerID, w.FirstName, w.LastName,
+                   wa.StartTime, wa.EndTime, wa.DayOfWeek,
+                   GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') AS specialties
+            FROM Worker w
             JOIN WorkerAvailability wa ON w.WorkerID = wa.WorkerID
             LEFT JOIN WorkerSpecialty ws ON w.WorkerID = ws.WorkerID
             LEFT JOIN Machine m ON ws.MachineID = m.MachineID
-            WHERE d.date BETWEEN DATE(wa.FromDate) AND DATE(wa.ToDate)
-              AND DAYOFWEEK(d.date) BETWEEN 2 AND 6
-            GROUP BY w.WorkerID, wa.WorkerAvailabilityID, d.date, wa.FromDate, wa.ToDate, wa.StartTime, wa.EndTime
-            ORDER BY d.date, w.LastName, w.FirstName
-        `, [startDateStr, endDateStr]);
-        
-        console.log('=== INDEX ROUTE DEBUG ===');
-        console.log('Date range:', startDateStr, 'to', endDateStr);
-        console.log('Availability records found:', availability.length);
-        if (availability.length > 0) {
-            console.log('First 3 records:');
-            availability.slice(0, 3).forEach(a => {
-                console.log(`  ${a.FirstName} ${a.LastName} - ${a.AvailableDate} (${a.DayOfWeek})`);
-            });
-        }
-        
-        res.render('index', { 
-            title: "Welcome", 
+            WHERE wa.DayOfWeek = ?
+            GROUP BY w.WorkerID, wa.WorkerAvailabilityID, wa.StartTime, wa.EndTime, wa.DayOfWeek
+            ORDER BY w.LastName, w.FirstName, wa.StartTime
+        `, [mysqlDayOfWeek]);
+
+        // Format times for display
+        const formattedSchedule = schedule.map(worker => ({
+            ...worker,
+            StartTime: formatTime(worker.StartTime),
+            EndTime: formatTime(worker.EndTime)
+        }));
+
+        res.render('index', {
+            title: "Welcome",
             page: "index",
             machines: machines,
-            availability: availability 
+            schedule: formattedSchedule,
+            currentWeekday: currentWeekday
         });
     } catch (err) {
-        console.error(err);
-        res.render('index', { 
-            title: "Welcome", 
+        console.error('ERROR on homepage:', err);
+        res.render('index', {
+            title: "Welcome",
             page: "index",
             machines: [],
-            availability: [] 
+            schedule: [],
+            currentWeekday: 'Today'
         });
+    }
+});
+
+// API endpoint to get schedule for a specific day offset
+router.get('/api/schedule', async (req, res) => {
+    try {
+        const dayOffset = parseInt(req.query.dayOffset) || 0;
+        
+        // Calculate the target date
+        const today = new Date();
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + dayOffset);
+        
+        const targetDayOfWeek = targetDate.getDay(); // JavaScript: 0=Sunday, 1=Monday, etc.
+        const mysqlDayOfWeek = targetDayOfWeek + 1; // MySQL: 1=Sunday, 2=Monday, etc.
+        
+        // Get weekday name
+        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const weekdayName = weekdayNames[targetDayOfWeek];
+        
+        // Query workers available on the target day of week
+        const [schedule] = await pool.query(`
+            SELECT w.WorkerID, w.FirstName, w.LastName,
+                   wa.StartTime, wa.EndTime, wa.DayOfWeek,
+                   GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') AS specialties
+            FROM Worker w
+            JOIN WorkerAvailability wa ON w.WorkerID = wa.WorkerID
+            LEFT JOIN WorkerSpecialty ws ON w.WorkerID = ws.WorkerID
+            LEFT JOIN Machine m ON ws.MachineID = m.MachineID
+            WHERE wa.DayOfWeek = ?
+            GROUP BY w.WorkerID, wa.WorkerAvailabilityID, wa.StartTime, wa.EndTime, wa.DayOfWeek
+            ORDER BY w.LastName, w.FirstName, wa.StartTime
+        `, [mysqlDayOfWeek]);
+        
+        // Format times for display
+        const formattedSchedule = schedule.map(worker => ({
+            ...worker,
+            StartTime: formatTime(worker.StartTime),
+            EndTime: formatTime(worker.EndTime)
+        }));
+        
+        res.json({
+            weekdayName: weekdayName,
+            schedule: formattedSchedule
+        });
+    } catch (err) {
+        console.error('ERROR fetching schedule:', err);
+        res.status(500).json({ error: 'Failed to fetch schedule' });
     }
 });
 

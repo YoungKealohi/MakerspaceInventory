@@ -73,39 +73,49 @@ block content
     h2 Availability Schedule
     
     h3 Add New Availability
-    form(method="post", action=`/workers/${worker.WorkerID}/add-availability`)
-      div
-        label(for="FromDate") From Date:
-        input#FromDate(type="date", name="FromDate", required)
-      div
-        label(for="ToDate") To Date:
-        input#ToDate(type="date", name="ToDate", required)
-      div
-        label(for="StartTime") Start Time:
-        input#StartTime(type="time", name="StartTime", required)
-      div
-        label(for="EndTime") End Time:
-        input#EndTime(type="time", name="EndTime", required)
-      div
-        button(type="submit") Add Availability
+      form(method="post", action=`/workers/${worker.WorkerID}/add-availability`)
+        div
+          label(for="DayOfWeek") Day:
+          select#DayOfWeek(name="DayOfWeek", required)
+            option(value="") -- Select Day --
+            option(value="2") Monday
+            option(value="3") Tuesday
+            option(value="4") Wednesday
+            option(value="5") Thursday
+            option(value="6") Friday
+        div
+          label(for="StartTime") Start Time:
+          select#StartTime(name="StartTime", required)
+            option(value="") -- Select Start Time --
+            each hour in [8,9,10,11,12,13,14,15,16,17]
+              - var display = (hour < 12 ? hour + ':00 AM' : (hour === 12 ? '12:00 PM' : (hour-12) + ':00 PM'))
+              option(value=(hour < 10 ? '0' + hour : '' + hour) + ':00:00')= display
+        div
+          label(for="EndTime") End Time:
+          select#EndTime(name="EndTime", required)
+            option(value="") -- Select End Time --
+            each hour in [9,10,11,12,13,14,15,16,17,18]
+              - var display = (hour < 12 ? hour + ':00 AM' : (hour === 12 ? '12:00 PM' : (hour-12) + ':00 PM'))
+              option(value=(hour < 10 ? '0' + hour : '' + hour) + ':00:00')= display
+        div
+          button(type="submit") Add Availability
     
     h3 Current Availability
-    if availabilities && availabilities.length > 0
-      table(border="1" cellpadding="6" cellspacing="0")
-        thead
-          tr
-            th From Date
-            th To Date
-            th Time
-            th Actions
-        tbody
-          each avail in availabilities
+      if availabilities && availabilities.length > 0
+        table(border="1" cellpadding="6" cellspacing="0")
+          thead
             tr
-              td= new Date(avail.FromDate).toLocaleDateString()
-              td= new Date(avail.ToDate).toLocaleDateString()
-              td= avail.StartTime.substring(0, 5) + ' - ' + avail.EndTime.substring(0, 5)
-              td.form
-                form(method="post", action=`/workers/${worker.WorkerID}/delete-availability/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
-                  button.delete(type="submit") Remove
-    else
-      p No availability scheduled yet.
+              th Day
+              th Time
+              th Actions
+          tbody
+            each avail in availabilities
+              tr
+                - var dayNames = {2: 'Monday', 3: 'Tuesday', 4: 'Wednesday', 5: 'Thursday', 6: 'Friday'}
+                td= dayNames[avail.DayOfWeek] || avail.DayOfWeek
+                td= avail.StartTime.substring(0, 5) + ' - ' + avail.EndTime.substring(0, 5)
+                td.form
+                  form(method="post", action=`/workers/${worker.WorkerID}/delete-availability/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
+                    button.delete(type="submit") Remove
+      else
+        p No availability scheduled yet.
