@@ -11,11 +11,9 @@ block content
       a.button-start-inventory(href="/start-inventory") Start Inventory
       a.button-schedule(href="/schedule") Schedule
 
-  p
+  .nav-buttons-container
     a.button-nav(href="/machines/new") Add Machine
-  p 
     a.button-nav(href=`/locations/`) Locations
-  p 
     a.button-nav(href=`/workers/`) Workers
 
   if machines.length === 0

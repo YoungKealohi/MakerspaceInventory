@@ -343,15 +343,32 @@ td.form form {
   background: #1f7e32; 
 }
 
+.nav-buttons-container {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-start;
+  margin: 20px 0;
+  margin-left: 40px;
+  flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
+}
+
 .button-nav {
   text-decoration: none;
   background: #007298;
   color: white;
-  padding: 6px 12px;
-  border-radius: 5px;
-  margin: 2px 5px;
+  padding: 12px 24px;
+  border-radius: 8px;
   display: inline-block;
   font-size: 18px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.button-nav:hover {
+  background: #005a78;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .button-nav-cancel {
@@ -489,15 +506,21 @@ input#Name {
   text-decoration: none;
   background: #007298;
   color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
   display: inline-block;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
 .button-login-home:hover {
   background: #005a73;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Logout button - top right corner */
@@ -807,20 +830,27 @@ form input[type="email"]:focus {
   background: #4f758b;
   color: white;
   border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
   flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  min-width: 110px;
 }
 
 .nav-button:hover {
   background: #3d5f73;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .nav-button:active {
   background: #2d4a5a;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .schedule-content {

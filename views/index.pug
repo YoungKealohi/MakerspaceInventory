@@ -27,10 +27,10 @@ block content
     .worker-schedule-panel(style="flex: 1; min-width: 320px; max-width: 480px; display: flex; flex-direction: column; align-items: center;")
       h2.schedule-title Worker Schedule
       .schedule-nav(style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 8px;")
-        button#prevDay.nav-button(type="button") ← Previous
+        button#prevDay.nav-button(type="button") ◀ Previous Day
         .day-info
           span#currentDay.schedule-day-label= currentWeekday
-        button#nextDay.nav-button(type="button") Next →
+        button#nextDay.nav-button(type="button") Next Day ▶
       if schedule && schedule.length > 0
         table.schedule-table(style="margin: 0 auto;")
           thead
