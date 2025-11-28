@@ -2,7 +2,6 @@ extends layout
 
 block content
   .logout-button-container
-    a.button-schedule(href="/schedule") Schedule
     a.button-logout(href="/") Log out
   if supply && supply.SupplyID
     h1 Edit #{supply.Name}

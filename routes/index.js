@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
             LEFT JOIN Machine m ON ws.MachineID = m.MachineID
             WHERE wa.DayOfWeek = ?
             GROUP BY w.WorkerID, wa.WorkerAvailabilityID, wa.StartTime, wa.EndTime, wa.DayOfWeek
-            ORDER BY w.LastName, w.FirstName, wa.StartTime
+            ORDER BY wa.StartTime, w.FirstName
         `, [mysqlDayOfWeek]);
 
         // Format times for display
@@ -68,7 +68,8 @@ router.get('/', async (req, res) => {
             page: "index",
             machines: machines,
             schedule: formattedSchedule,
-            currentWeekday: currentWeekday
+            currentWeekday: currentWeekday,
+            isAdmin: req.session?.isAdmin || false
         });
     } catch (err) {
         console.error('ERROR on homepage:', err);
@@ -77,7 +78,8 @@ router.get('/', async (req, res) => {
             page: "index",
             machines: [],
             schedule: [],
-            currentWeekday: 'Today'
+            currentWeekday: 'Today',
+            isAdmin: req.session?.isAdmin || false
         });
     }
 });
@@ -101,7 +103,7 @@ router.get('/api/schedule', async (req, res) => {
         
         // Query workers available on the target day of week
         const [schedule] = await pool.query(`
-            SELECT w.WorkerID, w.FirstName, w.LastName,
+            SELECT w.WorkerID, w.FirstName,
                    wa.StartTime, wa.EndTime, wa.DayOfWeek,
                    GROUP_CONCAT(DISTINCT m.MachineName ORDER BY m.MachineName SEPARATOR ', ') AS specialties
             FROM Worker w
@@ -110,7 +112,7 @@ router.get('/api/schedule', async (req, res) => {
             LEFT JOIN Machine m ON ws.MachineID = m.MachineID
             WHERE wa.DayOfWeek = ?
             GROUP BY w.WorkerID, wa.WorkerAvailabilityID, wa.StartTime, wa.EndTime, wa.DayOfWeek
-            ORDER BY w.LastName, w.FirstName, wa.StartTime
+            ORDER BY wa.StartTime, w.FirstName
         `, [mysqlDayOfWeek]);
         
         // Format times for display
@@ -143,7 +145,8 @@ router.post('/login', (req, res) => {
     const user = users.find(u => u.username === username && u.password === password);
     
     if (user) {
-        req.session.username = username; // <-- set username in session
+        req.session.username = username;
+        req.session.isAdmin = (username === 'admin'); // Set isAdmin flag
         // Successful login - redirect to machines page
         res.redirect('/machines');
     } else {

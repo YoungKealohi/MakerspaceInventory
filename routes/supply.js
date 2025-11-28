@@ -46,7 +46,8 @@ router.get('/:MachineID/supplies', async (req, res) => {
         res.render('supply', {
             machine: machineRows[0],
             supplies: supplyRows,
-            q
+            q,
+            isAdmin: req.session?.isAdmin || false
         });
     } catch (err) {
         console.error('Error fetching machines', err);
@@ -66,7 +67,8 @@ router.get('/:MachineID/supplies/new', async (req, res) => {
             machine: machineRows[0],
             locations,
             formAction: `/machines/${MachineID}/supplies/new`,
-            submitLabel: 'Create Supply'
+            submitLabel: 'Create Supply',
+            isAdmin: req.session?.isAdmin || false
         });
     } catch (err) {
         console.error('Error loading new supply form', err);
@@ -184,7 +186,8 @@ router.get('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
             SupplyType,
             selectedLocationIds,
             formAction: `/machines/${MachineID}/supplies/${SupplyID}/edit`,
-            submitLabel: 'Save Changes'
+            submitLabel: 'Save Changes',
+            isAdmin: req.session?.isAdmin || false
         });
 
     } catch (err) {
@@ -286,6 +289,77 @@ router.post('/:MachineID/supplies/:SupplyID/delete', async (req, res) => {
     }
 });
 
+// Helper functions for low stock reporting
+async function getLowStockSupplies() {
+  const query = `
+    SELECT 
+      s.SupplyID,
+      s.Name AS SupplyName,
+      s.Color,
+      s.Brand,
+      m.MachineName,
+      cs.Count,
+      cs.CriticalLevel,
+      ss.Status,
+      CASE
+        WHEN cs.SupplyID IS NOT NULL THEN 'Countable'
+        WHEN ss.SupplyID IS NOT NULL THEN 'Status'
+      END AS SupplyType,
+      GROUP_CONCAT(l.Name ORDER BY l.Name SEPARATOR ', ') AS Locations
+    FROM Supply s
+    LEFT JOIN Machine m ON s.MachineID = m.MachineID
+    LEFT JOIN CountableSupply cs ON s.SupplyID = cs.SupplyID
+    LEFT JOIN StatusSupply ss ON s.SupplyID = ss.SupplyID
+    LEFT JOIN SupplyLocation sl ON s.SupplyID = sl.SupplyID
+    LEFT JOIN Location l ON sl.LocationID = l.LocationID
+    WHERE 
+      (cs.Count IS NOT NULL AND cs.Count < cs.CriticalLevel)
+      OR 
+      (ss.Status IS NOT NULL AND ss.Status = 0)
+    GROUP BY s.SupplyID
+    ORDER BY m.MachineName, s.Name
+  `;
+  
+  const [supplies] = await pool.query(query);
+  return supplies;
+}
 
+function formatReportText(supplies) {
+  if (supplies.length === 0) {
+    return 'All supplies are currently at acceptable levels. No items need to be reordered at this time.';
+  }
+
+  let body = 'The following supplies need to be reordered:\n\n';
+  
+  supplies.forEach((supply, index) => {
+    body += `${index + 1}. ${supply.SupplyName}`;
+    
+    if (supply.Color) {
+      body += ` (${supply.Color})`;
+    }
+    
+    if (supply.Brand) {
+      body += ` - Brand: ${supply.Brand}`;
+    }
+    
+    body += `\n   Machine: ${supply.MachineName || 'N/A'}\n`;
+    
+    if (supply.SupplyType === 'Countable') {
+      body += `   Current Stock: ${supply.Count} (Critical Level: ${supply.CriticalLevel})\n`;
+    } else {
+      body += `   Status: Need More\n`;
+    }
+    
+    if (supply.Locations) {
+      body += `   Location(s): ${supply.Locations}\n`;
+    }
+    
+    body += '\n';
+  });
+  
+  return body;
+}
 
 module.exports = router;
+module.exports.getLowStockSupplies = getLowStockSupplies;
+module.exports.formatReportText = formatReportText;

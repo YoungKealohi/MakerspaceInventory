@@ -27,7 +27,10 @@ router.get("/start-inventory", async (req, res) => {
       );
       machineSupplies.push({ ...machine, supplies });
     }
-    res.render("start_inventory", { machines: machineSupplies });
+    res.render("start_inventory", { 
+      machines: machineSupplies,
+      isAdmin: req.session?.isAdmin || false
+    });
   } catch (err) {
     console.error("Error loading start inventory form", err);
     res.status(500).send("Database error");

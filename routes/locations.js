@@ -5,7 +5,12 @@ const router = express.Router();
 
 // show new location form
 router.get("/new", (req, res) => {
-    res.render("locations_form", { location: {}, formAction: '/locations/new', submitLabel: 'Create' })
+    res.render("locations_form", { 
+        location: {}, 
+        formAction: '/locations/new', 
+        submitLabel: 'Create',
+        isAdmin: req.session?.isAdmin || false
+    });
 });
 
 // insert new location
@@ -30,7 +35,10 @@ router.post("/new", async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM Location ORDER BY Name');
-    res.render('locations', { locations: rows });
+    res.render('locations', { 
+        locations: rows,
+        isAdmin: req.session?.isAdmin || false
+    });
   } catch (err) {
     console.error('Error fetching locations', err);
     res.status(500).send('Database error');
@@ -52,7 +60,9 @@ router.get('/:LocationID/edit', async (req, res) => {
     res.render('locations_form', { 
       location,
       formAction: `/locations/${LocationID}/edit`,
-      submitLabel: 'Save Changes' });
+      submitLabel: 'Save Changes',
+      isAdmin: req.session?.isAdmin || false
+    });
   } catch (err) {
     console.error("Error fetching location:", err);
     res.status(500).send("Database error");

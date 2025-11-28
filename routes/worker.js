@@ -65,7 +65,8 @@ router.get("/new", (req, res) => {
     availabilities: [],
     formatTime: formatTime,
     formAction: "/workers/new",
-    submitLabel: "Add Worker"
+    submitLabel: "Add Worker",
+    isAdmin: req.session?.isAdmin || false
   });
 });
 
@@ -118,7 +119,8 @@ router.get("/:id/edit", async (req, res) => {
       availabilities: availabilities,
       formatTime: formatTime,
       formAction: `/workers/${req.params.id}/edit`,
-      submitLabel: "Update Worker"
+      submitLabel: "Update Worker",
+      isAdmin: req.session?.isAdmin || false
     });
   } catch (err) {
     console.error(err);

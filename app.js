@@ -6,6 +6,7 @@ const suppliesRouter = require("./routes/supply");
 const locationsRouter = require("./routes/locations");
 const startInventoryRouter = require("./routes/start_inventory");
 const workerRouter = require("./routes/worker");
+const lowStockRouter = require("./routes/low_stock");
 
 const session = require('express-session');
 
@@ -21,7 +22,10 @@ app.use(
 app.use(session({
   secret: 'yourSecretKey', // use a strong secret in production!
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false, // Don't create session until something stored
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 // 24 hours
+  }
 }));
 
 
@@ -33,10 +37,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/locations', locationsRouter);
-app.use('/supply', suppliesRouter);
+app.use('/machines', suppliesRouter);
 app.use('/machines', machinesRouter);
 app.use('/', startInventoryRouter);
 app.use('/workers', workerRouter);
+app.use('/low-stock-report', lowStockRouter);
 
 app.listen(port, () => {
  console.log(`Example app listening at http://localhost:${port}`);

@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM Machine ORDER BY MachineID DESC');
     // Check if user is admin (session-based)
-    const isAdmin = req.session && req.session.username === 'admin';
+    const isAdmin = req.session?.isAdmin || false;
     res.render('machines', { machines: rows, isAdmin });
   } catch (err) {
     console.error('Error fetching machines', err);
@@ -19,7 +19,12 @@ router.get('/', async (req, res) => {
 // blank new machine form
 router.get('/new', (req, res) => {
   // Render form with empty machine object (used by the form template)
-  res.render('machines_form', { machine: {}, formAction: '/machines/new', submitLabel: 'Create' });
+  res.render('machines_form', { 
+    machine: {}, 
+    formAction: '/machines/new', 
+    submitLabel: 'Create',
+    isAdmin: req.session?.isAdmin || false
+  });
 });
 
 // create new machine
@@ -37,9 +42,7 @@ router.post('/new', async (req, res) => {
     res.redirect('/machines');
   } catch (err) {
     console.error('Error creating machine', err);
-    // Simple error handling — you can improve by rendering the form again with an error message
-    res.status(500).send('Error creating machine. Maybe SerialNumber duplicate?');
-    res.render('machines_form', { machine: {}, formAction: '/machines/new', submitLabel: 'Create' });
+    res.status(500).send('Error creating machine.');
   }
 });
 
@@ -57,7 +60,8 @@ router.get('/:MachineID/edit', async (req, res) => {
     res.render('machines_form', {
       machine,
       formAction: `/machines/${MachineID}/edit`,
-      submitLabel: 'Save Changes'
+      submitLabel: 'Save Changes',
+      isAdmin: req.session?.isAdmin || false
     });
   } catch (err) {
     console.error('Error loading machine', err);
