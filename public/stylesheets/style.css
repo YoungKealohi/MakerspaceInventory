@@ -456,15 +456,18 @@ td.form form {
   display: inline-block;
   margin: 5px;
   padding: 10px 15px;
-  background: #28a745;
+  background: #71B1C8;
   color: white;
   border-radius: 5px;
   text-decoration: none;
   font-weight: bold;
+  font-size: 14px;
+  border: none;
 }
 
 .add-button:hover {
-  background: #1f7e32; 
+  background: #5991a1; 
+  cursor: pointer;
 }
 
 .nav-buttons-container {
