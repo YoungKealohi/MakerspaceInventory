@@ -25,15 +25,16 @@ block content
       label Locations (select multiple):
       div(style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;")
         each loc in locations
-          div(style="margin-bottom: 8px;")
+          div(style="margin-bottom: 8px; display: flex; align-items: center;")
             input(
               type="checkbox", 
               name="LocationIDs", 
               value=loc.LocationID,
               id=`loc_${loc.LocationID}`,
-              checked=(selectedLocationIds && selectedLocationIds.includes(loc.LocationID))
+              checked=(selectedLocationIds && selectedLocationIds.includes(loc.LocationID)),
+              style="margin: 0;"
             )
-            label(for=`loc_${loc.LocationID}`, style="margin-left: 5px; cursor: pointer;")= loc.Name
+            label(for=`loc_${loc.LocationID}`, style="margin-left: 8px; cursor: pointer; margin-bottom: 0;")= loc.Name + (loc.Description ? ` (${loc.Description})` : '')
 
     div
       label(for="SupplyType") Supply Type:
