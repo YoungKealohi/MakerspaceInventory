@@ -3,7 +3,6 @@ extends layout
 block content
   .logout-button-container
     a.button-logout(href="/") Log out
-    a.button-schedule(href="/schedule") Schedule
 
   h1 Low Stock Report
 
@@ -11,26 +10,25 @@ block content
     a.button-nav(href="/machines") Back to Machines
 
   if supplies.length === 0
-    p.no-supplies(style="margin: 20px; padding: 20px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;") 
+    p.no-supplies(style="margin: 10px; padding: 20px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;") 
       strong Good news!
       |  All supplies are currently at acceptable levels. No items need to be reordered at this time.
   else
-    p(style="margin: 20px 0;") 
+    p(style="margin: 10px;") 
       strong #{supplies.length}
-      |  supply item(s) need to be reordered. Copy the text below and email it to a supervisor.
+      |  supply item(s) need to be reordered. Copy the text below and email it to #{bosses.map(boss => `${boss.FirstName} (${boss.Email})`).join(', ')}.
 
-    .report-text-container(style="margin: 20px 0;")
+    .report-text-container(style="margin: 10px;")
       h2 Copy Report Text:
-      button#copyButton.button-nav(type="button" style="background-color: #007bff; margin-bottom: 10px;") Copy to Clipboard
-      textarea#reportText(readonly style="width: 100%; min-height: 300px; padding: 10px; font-family: monospace; font-size: 14px; border: 2px solid #ddd; border-radius: 5px; background-color: #f8f9fa;")= reportText
+      button#copyButton.button-nav(type="button" style="background-color: #007298; margin: 10px; cursor: pointer;") Copy to Clipboard
+      textarea#reportText(readonly style="width: 90%; min-height: 300px; padding: 10px; margin: 10px; font-family: monospace; font-size: 14px; border: 2px solid #ddd; border-radius: 5px; background-color: #f8f9fa;")= reportText
       
     h2 Detailed View:
-    table(border="1" cellpadding="6" cellspacing="0" style="margin: 20px 0;")
+    table(border="1" cellpadding="6" cellspacing="0" style="margin: 10px;")
       thead
         tr
           th Supply Name
           th Machine
-          th Type
           th Status
           th Location(s)
       tbody
@@ -44,7 +42,6 @@ block content
                 br
                 small Brand: #{supply.Brand}
             td= supply.MachineName || 'N/A'
-            td= supply.SupplyType
             td
               if supply.SupplyType === 'Countable'
                 | Stock: #{supply.Count} / Critical: #{supply.CriticalLevel}
@@ -66,6 +63,6 @@ block content
       
       setTimeout(() => {
         button.textContent = originalText;
-        button.style.backgroundColor = '#007bff';
+        button.style.backgroundColor = '#007298';
       }, 2000);
     });

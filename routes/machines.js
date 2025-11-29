@@ -99,8 +99,8 @@ router.post('/:MachineID/delete', async (req, res) => {
     const supplyIDs = supplies.map(s => s.SupplyID);
     if (supplyIDs.length > 0) {
       // Delete from CountableSupply and StatusSupply
-      await connection.query('DELETE FROM CountableSupply WHERE SupplyID IN (?)', [supplyIDs]);
-      await connection.query('DELETE FROM StatusSupply WHERE SupplyID IN (?)', [supplyIDs]);
+      await connection.query('DELETE FROM CountableSupply WHERE EXISTS (SELECT SupplyID FROM CountableSupply c WHERE c.SupplyID = ?)', [supplyIDs]);
+      await connection.query('DELETE FROM StatusSupply WHERE EXISTS (SELECT SupplyID FROM StatusSupply s WHERE s.SupplyID = ?)', [supplyIDs]);
       // Delete supplies
       await connection.query('DELETE FROM Supply WHERE MachineID = ?', [MachineID]);
     }

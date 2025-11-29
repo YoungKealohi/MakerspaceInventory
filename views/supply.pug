@@ -3,11 +3,9 @@ extends layout
 block content
   .logout-button-container
     a.button-logout(href="/") Log out
-  // Admin Start Inventory and Schedule buttons (top right, below navbar)
-  if isAdmin
-    .start-inventory-container
-      a.button-start-inventory(href="/start-inventory") Start Inventory
-      a.button-start-inventory(href="/low-stock-report" style="background-color: #ff9800; margin-left: 10px;") Low Stock Report
+  .start-inventory-container
+    a.button-start-inventory(href="/start-inventory") Start Inventory
+    a.button-start-inventory(href="/low-stock-report" style="background-color: #ff9800; margin-left: 10px;") Low Stock Report
   h1 #{machine.MachineName}
   p
     a.button-nav(href=`/machines/`) Go Back To List of Machines

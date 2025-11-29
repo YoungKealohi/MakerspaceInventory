@@ -14,7 +14,7 @@ block content
     div
       label(for="Name") Name
       input#Name(type="text", name="Name", required, maxlength="30", value=location.Name || '')
-    //- Description (larger textarea)
+    //- Description
     div
       label(for="Description") Description
       textarea#Description(name="Description", rows="4", maxlength="200")= location.Description || ''

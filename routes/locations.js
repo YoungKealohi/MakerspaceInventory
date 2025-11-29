@@ -34,7 +34,7 @@ router.post("/new", async (req, res) => {
 // list the locations
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM Location ORDER BY Name');
+    const [rows] = await pool.query('SELECT Name, Description FROM Location ORDER BY Name');
     res.render('locations', { 
         locations: rows,
         isAdmin: req.session?.isAdmin || false
@@ -50,7 +50,7 @@ router.get('/:LocationID/edit', async (req, res) => {
   const { LocationID } = req.params;
 
   try {
-    const [rows] = await pool.query("SELECT * FROM Location WHERE LocationID = ?", [LocationID]);
+    const [rows] = await pool.query("SELECT Name, Description FROM Location WHERE LocationID = ?", [LocationID]);
 
     if (rows.length === 0) {
       return res.status(404).send("Location not found");
@@ -85,7 +85,7 @@ router.post('/:LocationID/edit', async (req, res) => {
   }
 });
 
-// Also accept POST to '/:LocationID/delete' (some views use that action)
+// delete location
 router.post('/:LocationID/delete', async (req, res) => {
   const { LocationID } = req.params;
   const connection = await pool.getConnection();

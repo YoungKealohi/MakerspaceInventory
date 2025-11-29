@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
     res.render("workers", {
       title: "Workers",
       workers: workers,
-      isAdmin: req.session.isAdmin
+      isAdmin: req.session?.isAdmin || false
     });
   } catch (err) {
     console.error(err);
