@@ -130,16 +130,52 @@ router.get("/:id/edit", async (req, res) => {
 
 // POST /workers/:id/edit - Update worker
 router.post("/:id/edit", async (req, res) => {
+  const connection = await pool.getConnection();
   try {
-    const { FirstName, LastName, IsBoss, PhoneNumber, Email } = req.body;
-    await pool.query(
+    await connection.beginTransaction();
+    
+    const { FirstName, LastName, IsBoss, PhoneNumber, Email, MachineIDs, availability } = req.body;
+    
+    // Update worker details
+    await connection.query(
       "UPDATE Worker SET FirstName = ?, LastName = ?, IsBoss = ?, PhoneNumber = ?, Email = ? WHERE WorkerID = ?",
       [FirstName, LastName, IsBoss ? 1 : 0, PhoneNumber || null, Email || null, req.params.id]
     );
+    
+    // Update specialties - delete all and re-insert
+    await connection.query("DELETE FROM WorkerSpecialty WHERE WorkerID = ?", [req.params.id]);
+    if (MachineIDs) {
+      const machineIds = Array.isArray(MachineIDs) ? MachineIDs : [MachineIDs];
+      for (const machineId of machineIds) {
+        await connection.query(
+          "INSERT INTO WorkerSpecialty (WorkerID, MachineID) VALUES (?, ?)",
+          [req.params.id, machineId]
+        );
+      }
+    }
+    
+    // Update availabilities - delete all and re-insert
+    await connection.query("DELETE FROM WorkerAvailability WHERE WorkerID = ?", [req.params.id]);
+    if (availability) {
+      for (const key in availability) {
+        const avail = availability[key];
+        if (avail.day && avail.start && avail.end) {
+          await connection.query(
+            "INSERT INTO WorkerAvailability (WorkerID, DayOfWeek, StartTime, EndTime) VALUES (?, ?, ?, ?)",
+            [req.params.id, avail.day, avail.start, avail.end]
+          );
+        }
+      }
+    }
+    
+    await connection.commit();
     res.redirect("/workers");
   } catch (err) {
+    await connection.rollback();
     console.error(err);
     res.status(500).send("Database error");
+  } finally {
+    connection.release();
   }
 });
 
@@ -148,58 +184,6 @@ router.post("/delete/:id", async (req, res) => {
   try {
     await pool.query("DELETE FROM Worker WHERE WorkerID = ?", [req.params.id]);
     res.redirect("/workers");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database error");
-  }
-});
-
-// POST /workers/:id/add-specialty - Add specialty
-router.post("/:id/add-specialty", async (req, res) => {
-  try {
-    const { MachineID } = req.body;
-    await pool.query(
-      "INSERT INTO WorkerSpecialty (WorkerID, MachineID) VALUES (?, ?)",
-      [req.params.id, MachineID]
-    );
-    res.redirect(`/workers/${req.params.id}/edit`);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database error");
-  }
-});
-
-// POST /workers/:workerId/delete-specialty/:specialtyId - Delete specialty
-router.post("/:workerId/delete-specialty/:specialtyId", async (req, res) => {
-  try {
-    await pool.query("DELETE FROM WorkerSpecialty WHERE WorkerSpecialtyID = ?", [req.params.specialtyId]);
-    res.redirect(`/workers/${req.params.workerId}/edit`);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database error");
-  }
-});
-
-// POST /workers/:id/add-availability - Add availability
-router.post("/:id/add-availability", async (req, res) => {
-  try {
-    const { DayOfWeek, StartTime, EndTime } = req.body;
-    await pool.query(
-      "INSERT INTO WorkerAvailability (WorkerID, DayOfWeek, StartTime, EndTime) VALUES (?, ?, ?, ?)",
-      [req.params.id, DayOfWeek, StartTime, EndTime]
-    );
-    res.redirect(`/workers/${req.params.id}/edit`);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database error");
-  }
-});
-
-// POST /workers/:workerId/delete-availability/:availabilityId - Delete availability
-router.post("/:workerId/delete-availability/:availabilityId", async (req, res) => {
-  try {
-    await pool.query("DELETE FROM WorkerAvailability WHERE WorkerAvailabilityID = ?", [req.params.availabilityId]);
-    res.redirect(`/workers/${req.params.workerId}/edit`);
   } catch (err) {
     console.error(err);
     res.status(500).send("Database error");

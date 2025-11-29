@@ -10,6 +10,7 @@ block content
     h1 New Worker
 
   form(method="post", action=formAction)
+    h2 Worker Details
     div
       label(for="FirstName") First Name:
       input#FirstName(type="text", name="FirstName", required, maxlength="20", value=worker ? worker.FirstName : "")
@@ -31,83 +32,98 @@ block content
       label(for="Email") Email:
       input#Email(type="email", name="Email", maxlength="30", value=worker ? worker.Email : "")
 
-    div
+    if worker && worker.WorkerID
+      hr
+      
+      h2 Machine Specialties
+      div
+        label Specialties (select multiple):
+        div(style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;")
+          each machine in machines
+            div(style="margin-bottom: 8px; display: flex; align-items: center;")
+              input(
+                type="checkbox",
+                name="MachineIDs",
+                value=machine.MachineID,
+                id=`machine_${machine.MachineID}`,
+                checked=(specialties && specialties.some(s => s.MachineID === machine.MachineID)),
+                style="margin: 0;"
+              )
+              label(for=`machine_${machine.MachineID}`, style="margin-left: 8px; cursor: pointer; margin-bottom: 0;")= machine.MachineName
+      
+      hr
+      
+      h2 Availability Schedule
+      div#availabilityContainer
+        if availabilities && availabilities.length > 0
+          each avail, index in availabilities
+            .availability-entry(style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;", data-index=index)
+              div(style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 20px; align-items: end;")
+                div
+                  label(style="display: block; margin-bottom: 5px; font-weight: bold;") Day:
+                  select(name=`availability[${index}][day]`, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
+                    option(value="2", selected=(avail.DayOfWeek === 2)) Monday
+                    option(value="3", selected=(avail.DayOfWeek === 3)) Tuesday
+                    option(value="4", selected=(avail.DayOfWeek === 4)) Wednesday
+                    option(value="5", selected=(avail.DayOfWeek === 5)) Thursday
+                    option(value="6", selected=(avail.DayOfWeek === 6)) Friday
+                div
+                  label(style="display: block; margin-bottom: 5px; font-weight: bold;") Start Time:
+                  input(type="time", name=`availability[${index}][start]`, value=avail.StartTime, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
+                div
+                  label(style="display: block; margin-bottom: 5px; font-weight: bold;") End Time:
+                  input(type="time", name=`availability[${index}][end]`, value=avail.EndTime, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
+                div
+                  button.delete(type="button", onclick="removeAvailability(this)") Remove
+      
+      button.add-button(type="button", onclick="addAvailability()", style="margin-top: 10px; margin-left: 20px;") Add Availability Slot
+
+    div(style="margin-top: 30px;")
       button(type="submit")= submitLabel
       a.button-nav-cancel(href=`/workers/`) Cancel
 
-  if worker && worker.WorkerID
-    hr
+  script.
+    let availabilityIndex = #{availabilities ? availabilities.length : 0};
     
-    h2 Machine Specialties
+    function addAvailability() {
+      const container = document.getElementById('availabilityContainer');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'availability-entry';
+      newEntry.style.cssText = 'border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;';
+      newEntry.setAttribute('data-index', availabilityIndex);
+      
+      newEntry.innerHTML = `
+        <div style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 20px; align-items: end;">
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Day:</label>
+            <select name="availability[${availabilityIndex}][day]" required style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+              <option value="">-- Select Day --</option>
+              <option value="2">Monday</option>
+              <option value="3">Tuesday</option>
+              <option value="4">Wednesday</option>
+              <option value="5">Thursday</option>
+              <option value="6">Friday</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Start Time:</label>
+            <input type="time" name="availability[${availabilityIndex}][start]" required style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">End Time:</label>
+            <input type="time" name="availability[${availabilityIndex}][end]" required style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+          </div>
+          <div>
+            <button class="delete" type="button" onclick="removeAvailability(this)">Remove</button>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(newEntry);
+      availabilityIndex++;
+    }
     
-    h3 Add New Specialty
-    form(method="post", action=`/workers/${worker.WorkerID}/add-specialty`)
-      div
-        label(for="MachineID") Machine:
-        select#MachineID(name="MachineID", required)
-          option(value="") -- Select Machine --
-          each machine in machines
-            option(value=machine.MachineID)= machine.MachineName
-      div
-        button(type="submit") Add Specialty
-    
-    h3 Current Specialties
-    if specialties && specialties.length > 0
-      table(border="1" cellpadding="6" cellspacing="0")
-        thead
-          tr
-            th Machine Name
-            th Actions
-        tbody
-          each specialty in specialties
-            tr
-              td= specialty.MachineName
-              td.form
-                form(method="post", action=`/workers/${worker.WorkerID}/delete-specialty/${specialty.WorkerSpecialtyID}`, onsubmit="return confirm('Remove this specialty?');")
-                  button.delete(type="submit") Remove
-    else
-      p No specialties assigned yet.
-    
-    hr
-    
-    h2 Availability Schedule
-    
-    h3 Add New Availability
-      form(method="post", action=`/workers/${worker.WorkerID}/add-availability`)
-        div
-          label(for="DayOfWeek") Day:
-          select#DayOfWeek(name="DayOfWeek", required)
-            option(value="") -- Select Day --
-            option(value="2") Monday
-            option(value="3") Tuesday
-            option(value="4") Wednesday
-            option(value="5") Thursday
-            option(value="6") Friday
-        div
-          label(for="StartTime") Start Time:
-          input#StartTime(type="time", name="StartTime", required)
-        div
-          label(for="EndTime") End Time:
-          input#EndTime(type="time", name="EndTime", required)
-        div
-          button(type="submit") Add Availability
-    
-    h3 Current Availability
-      if availabilities && availabilities.length > 0
-        table(border="1" cellpadding="6" cellspacing="0")
-          thead
-            tr
-              th Day
-              th Time
-              th Actions
-          tbody
-            each avail in availabilities
-              tr
-                - var dayNames = {2: 'Monday', 3: 'Tuesday', 4: 'Wednesday', 5: 'Thursday', 6: 'Friday'}
-                td= dayNames[avail.DayOfWeek] || avail.DayOfWeek
-                td= formatTime(avail.StartTime) + ' - ' + formatTime(avail.EndTime)
-                td.form
-                  form(method="post", action=`/workers/${worker.WorkerID}/delete-availability/${avail.WorkerAvailabilityID}`, onsubmit="return confirm('Remove this availability?');")
-                    button.delete(type="submit") Remove
-      else
-        p No availability scheduled yet.
+    function removeAvailability(button) {
+      const entry = button.closest('.availability-entry');
+      entry.remove();
+    }
