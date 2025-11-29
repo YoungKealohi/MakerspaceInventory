@@ -7,8 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM Machine ORDER BY MachineID DESC');
-    // Check if user is admin (session-based)
-    res.render('machines', { machines: rows, isAdmin });
+    res.render('machines', { machines: rows});
   } catch (err) {
     console.error('Error fetching machines', err);
     res.status(500).send('Database error');
