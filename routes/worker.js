@@ -46,8 +46,7 @@ router.get("/", async (req, res) => {
 
     res.render("workers", {
       title: "Workers",
-      workers: workers,
-      isAdmin: req.session?.isAdmin || false
+      workers: workers
     });
   } catch (err) {
     console.error(err);
@@ -65,8 +64,7 @@ router.get("/new", (req, res) => {
     availabilities: [],
     formatTime: formatTime,
     formAction: "/workers/new",
-    submitLabel: "Add Worker",
-    isAdmin: req.session?.isAdmin || false
+    submitLabel: "Add Worker"
   });
 });
 
@@ -119,8 +117,7 @@ router.get("/:id/edit", async (req, res) => {
       availabilities: availabilities,
       formatTime: formatTime,
       formAction: `/workers/${req.params.id}/edit`,
-      submitLabel: "Update Worker",
-      isAdmin: req.session?.isAdmin || false
+      submitLabel: "Update Worker"
     });
   } catch (err) {
     console.error(err);
