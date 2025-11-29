@@ -46,8 +46,7 @@ router.get('/:MachineID/supplies', async (req, res) => {
         res.render('supply', {
             machine: machineRows[0],
             supplies: supplyRows,
-            q,
-            isAdmin: req.session?.isAdmin || false
+            q
         });
     } catch (err) {
         console.error('Error fetching machines', err);
@@ -67,8 +66,7 @@ router.get('/:MachineID/supplies/new', async (req, res) => {
             machine: machineRows[0],
             locations,
             formAction: `/machines/${MachineID}/supplies/new`,
-            submitLabel: 'Create Supply',
-            isAdmin: req.session?.isAdmin || false
+            submitLabel: 'Create Supply'
         });
     } catch (err) {
         console.error('Error loading new supply form', err);
@@ -186,8 +184,7 @@ router.get('/:MachineID/supplies/:SupplyID/edit', async (req, res) => {
             SupplyType,
             selectedLocationIds,
             formAction: `/machines/${MachineID}/supplies/${SupplyID}/edit`,
-            submitLabel: 'Save Changes',
-            isAdmin: req.session?.isAdmin || false
+            submitLabel: 'Save Changes'
         });
 
     } catch (err) {

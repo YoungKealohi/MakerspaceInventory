@@ -2,12 +2,8 @@ const express = require("express");
 const pool = require("../db/pool");
 const router = express.Router();
 
-// GET start inventory form (admin only)
+// GET start inventory form
 router.get("/start-inventory", async (req, res) => {
-  // Simple admin check (adapt as needed)
-  if (!req.session || req.session.username !== 'admin') {
-    return res.status(403).send('Forbidden: Admins only');
-  }
   try {
     // Get all machines
     const [machines] = await pool.query("SELECT * FROM Machine ORDER BY MachineName ASC");
@@ -28,8 +24,7 @@ router.get("/start-inventory", async (req, res) => {
       machineSupplies.push({ ...machine, supplies });
     }
     res.render("start_inventory", { 
-      machines: machineSupplies,
-      isAdmin: req.session?.isAdmin || false
+      machines: machineSupplies
     });
   } catch (err) {
     console.error("Error loading start inventory form", err);
@@ -37,12 +32,8 @@ router.get("/start-inventory", async (req, res) => {
   }
 });
 
-// POST start inventory (admin only)
+// POST start inventory
 router.post("/start-inventory", async (req, res) => {
-  // Simple admin check (adapt as needed)
-  if (!req.session || req.session.username !== 'admin') {
-    return res.status(403).send('Forbidden: Admins only');
-  }
   const form = req.body;
   const connection = await pool.getConnection();
   try {

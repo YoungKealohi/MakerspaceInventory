@@ -7,9 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM Machine ORDER BY MachineID DESC');
-    // Check if user is admin (session-based)
-    const isAdmin = req.session?.isAdmin || false;
-    res.render('machines', { machines: rows, isAdmin });
+    res.render('machines', { machines: rows});
   } catch (err) {
     console.error('Error fetching machines', err);
     res.status(500).send('Database error');
@@ -22,8 +20,7 @@ router.get('/new', (req, res) => {
   res.render('machines_form', { 
     machine: {}, 
     formAction: '/machines/new', 
-    submitLabel: 'Create',
-    isAdmin: req.session?.isAdmin || false
+    submitLabel: 'Create'
   });
 });
 
@@ -60,8 +57,7 @@ router.get('/:MachineID/edit', async (req, res) => {
     res.render('machines_form', {
       machine,
       formAction: `/machines/${MachineID}/edit`,
-      submitLabel: 'Save Changes',
-      isAdmin: req.session?.isAdmin || false
+      submitLabel: 'Save Changes'
     });
   } catch (err) {
     console.error('Error loading machine', err);

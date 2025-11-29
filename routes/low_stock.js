@@ -40,8 +40,7 @@ router.get("/", async (req, res) => {
       title: "Low Stock Report",
       supplies: supplies,
       bosses: bosses,
-      reportText: reportText,
-      isAdmin: req.session?.isAdmin || false
+      reportText: reportText
     });
   } catch (err) {
     console.error(err);

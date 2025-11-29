@@ -9,7 +9,6 @@ router.get("/new", (req, res) => {
         location: {}, 
         formAction: '/locations/new', 
         submitLabel: 'Create',
-        isAdmin: req.session?.isAdmin || false
     });
 });
 
@@ -37,8 +36,7 @@ router.get('/', async (req, res) => {
     // include LocationID so templates can build edit/delete links
     const [rows] = await pool.query('SELECT LocationID, Name, Description FROM Location ORDER BY Name');
     res.render('locations', { 
-        locations: rows,
-        isAdmin: req.session?.isAdmin || false
+        locations: rows
     });
   } catch (err) {
     console.error('Error fetching locations', err);
@@ -62,8 +60,7 @@ router.get('/:LocationID/edit', async (req, res) => {
     res.render('locations_form', { 
       location,
       formAction: `/locations/${LocationID}/edit`,
-      submitLabel: 'Save Changes',
-      isAdmin: req.session?.isAdmin || false
+      submitLabel: 'Save Changes'
     });
   } catch (err) {
     console.error("Error fetching location:", err);
