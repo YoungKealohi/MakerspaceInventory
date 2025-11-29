@@ -57,31 +57,72 @@ router.get("/", async (req, res) => {
 
 // GET /workers/new - Show form to add new worker
 router.get("/new", (req, res) => {
-  res.render("worker_form", {
-    title: "Add Worker",
-    worker: null,
-    machines: [],
-    specialties: [],
-    availabilities: [],
-    formatTime: formatTime,
-    formAction: "/workers/new",
-    submitLabel: "Add Worker",
-    isAdmin: req.session?.isAdmin || false
-  });
+  (async () => {
+    try {
+      // fetch machines so specialties can be selected when creating
+      const [machines] = await pool.query("SELECT MachineID, MachineName FROM Machine ORDER BY MachineName");
+      res.render("worker_form", {
+        title: "Add Worker",
+        worker: null,
+        machines: machines,
+        specialties: [],
+        availabilities: [],
+        formatTime: formatTime,
+        formAction: "/workers/new",
+        submitLabel: "Add Worker",
+        isAdmin: req.session?.isAdmin || false
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Database error');
+    }
+  })();
 });
 
 // POST /workers/new - Create new worker
 router.post("/new", async (req, res) => {
+  const connection = await pool.getConnection();
   try {
-    const { FirstName, LastName, IsBoss, PhoneNumber, Email } = req.body;
-    await pool.query(
+    await connection.beginTransaction();
+    const { FirstName, LastName, IsBoss, PhoneNumber, Email, MachineIDs, availability } = req.body;
+    const [result] = await connection.query(
       "INSERT INTO Worker (FirstName, LastName, IsBoss, PhoneNumber, Email) VALUES (?, ?, ?, ?, ?)",
       [FirstName, LastName, IsBoss ? 1 : 0, PhoneNumber || null, Email || null]
     );
-    res.redirect("/workers");
+    const workerId = result.insertId;
+
+    // Insert specialties if provided
+    if (MachineIDs) {
+      const machineIds = Array.isArray(MachineIDs) ? MachineIDs : [MachineIDs];
+      for (const machineId of machineIds) {
+        await connection.query(
+          "INSERT INTO WorkerSpecialty (WorkerID, MachineID) VALUES (?, ?)",
+          [workerId, machineId]
+        );
+      }
+    }
+
+    // Insert availabilities if provided
+    if (availability) {
+      for (const key in availability) {
+        const avail = availability[key];
+        if (avail.day && avail.start && avail.end) {
+          await connection.query(
+            "INSERT INTO WorkerAvailability (WorkerID, DayOfWeek, StartTime, EndTime) VALUES (?, ?, ?, ?)",
+            [workerId, avail.day, avail.start, avail.end]
+          );
+        }
+      }
+    }
+
+    await connection.commit();
+    res.redirect('/workers');
   } catch (err) {
+    await connection.rollback();
     console.error(err);
     res.status(500).send("Database error");
+  } finally {
+    connection.release();
   }
 });
 

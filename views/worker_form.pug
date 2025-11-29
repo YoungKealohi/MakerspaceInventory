@@ -32,51 +32,56 @@ block content
       label(for="Email") Email:
       input#Email(type="email", name="Email", maxlength="30", value=worker ? worker.Email : "")
 
-    if worker && worker.WorkerID
-      hr
-      
-      h2 Machine Specialties
-      div
-        label Specialties (select multiple):
-        div(style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;")
-          each machine in machines
-            div(style="margin-bottom: 8px; display: flex; align-items: center;")
-              input(
-                type="checkbox",
-                name="MachineIDs",
-                value=machine.MachineID,
-                id=`machine_${machine.MachineID}`,
-                checked=(specialties && specialties.some(s => s.MachineID === machine.MachineID)),
-                style="margin: 0;"
-              )
-              label(for=`machine_${machine.MachineID}`, style="margin-left: 8px; cursor: pointer; margin-bottom: 0;")= machine.MachineName
-      
-      hr
-      
-      h2 Availability Schedule
-      div#availabilityContainer
-        if availabilities && availabilities.length > 0
-          each avail, index in availabilities
-            .availability-entry(style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;", data-index=index)
-              div(style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 20px; align-items: end;")
-                div
-                  label(style="display: block; margin-bottom: 5px; font-weight: bold;") Day:
-                  select(name=`availability[${index}][day]`, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
-                    option(value="2", selected=(avail.DayOfWeek === 2)) Monday
-                    option(value="3", selected=(avail.DayOfWeek === 3)) Tuesday
-                    option(value="4", selected=(avail.DayOfWeek === 4)) Wednesday
-                    option(value="5", selected=(avail.DayOfWeek === 5)) Thursday
-                    option(value="6", selected=(avail.DayOfWeek === 6)) Friday
-                div
-                  label(style="display: block; margin-bottom: 5px; font-weight: bold;") Start Time:
-                  input(type="time", name=`availability[${index}][start]`, value=avail.StartTime, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
-                div
-                  label(style="display: block; margin-bottom: 5px; font-weight: bold;") End Time:
-                  input(type="time", name=`availability[${index}][end]`, value=avail.EndTime, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
-                div
-                  button.delete(type="button", onclick="removeAvailability(this)") Remove
-      
-      button.add-button(type="button", onclick="addAvailability()", style="margin-top: 10px; margin-left: 20px;") Add Availability Slot
+    // Always allow specialties and availability when creating or editing a worker
+    hr
+
+    h2 Machine Specialties
+    div
+      label Specialties (select multiple):
+      div(style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;")
+        each machine in machines
+          - var isChecked = false;
+          if (specialties && specialties.length)
+            - isChecked = specialties.some(s => s.MachineID === machine.MachineID)
+          div(style="margin-bottom: 8px; display: flex; align-items: center;")
+            input(
+              type="checkbox",
+              name="MachineIDs",
+              value=machine.MachineID,
+              id=`machine_${machine.MachineID}`,
+              checked=isChecked,
+              style="margin: 0;"
+            )
+            label(for=`machine_${machine.MachineID}`, style="margin-left: 8px; cursor: pointer; margin-bottom: 0;")= machine.MachineName
+
+    hr
+
+    h2 Availability Schedule
+    div#availabilityContainer
+      if availabilities && availabilities.length > 0
+        each avail, index in availabilities
+          .availability-entry(style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;", data-index=index)
+            div(style="display: grid; grid-template-columns: 200px 150px 150px 100px; gap: 20px; align-items: end;")
+              div
+                label(style="display: block; margin-bottom: 5px; font-weight: bold;") Day:
+                select(name=`availability[${index}][day]`, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
+                  option(value="2", selected=(avail.DayOfWeek === 2)) Monday
+                  option(value="3", selected=(avail.DayOfWeek === 3)) Tuesday
+                  option(value="4", selected=(avail.DayOfWeek === 4)) Wednesday
+                  option(value="5", selected=(avail.DayOfWeek === 5)) Thursday
+                  option(value="6", selected=(avail.DayOfWeek === 6)) Friday
+              div
+                label(style="display: block; margin-bottom: 5px; font-weight: bold;") Start Time:
+                input(type="time", name=`availability[${index}][start]`, value=avail.StartTime, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
+              div
+                label(style="display: block; margin-bottom: 5px; font-weight: bold;") End Time:
+                input(type="time", name=`availability[${index}][end]`, value=avail.EndTime, required, style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;")
+              div
+                button.delete(type="button", onclick="removeAvailability(this)") Remove
+      else
+        // show nothing initially — user can add slots
+    
+    button.add-button(type="button", onclick="addAvailability()", style="margin-top: 10px; margin-left: 20px;") Add Availability Slot
 
     div(style="margin-top: 30px;")
       button(type="submit")= submitLabel
