@@ -16,7 +16,7 @@ block content
   else
     p(style="margin: 10px;") 
       strong #{supplies.length}
-      |  supply item(s) need to be reordered. Copy the text below and email it to #{bosses.map(boss => `${boss.FirstName} (${boss.Email})`).join(', ')}.
+      |  supply item(s) need to be reordered. Copy the text below and email it to #{bosses.map(boss => `${boss.FirstName} (${boss.Email})`).join(', ')}. You may need to look up supply numbers or links to the product.
 
     .report-text-container(style="margin: 10px;")
       h2 Copy Report Text:
