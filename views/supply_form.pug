@@ -4,9 +4,9 @@ block content
   .logout-button-container
     a.button-logout(href="/") Log out
   if supply && supply.SupplyID
-    h1 Edit #{supply.Name}
+    h1 Edit #{supply.Name} for #{machine.MachineName}
   else
-    h1 New Supply
+    h1 New Supply for #{machine.MachineName}
 
   form(method="post", action=formAction)
     div
