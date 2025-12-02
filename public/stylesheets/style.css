@@ -344,8 +344,15 @@ table {
 
 /* Allow supply name column to wrap and be wider */
 td, th {
-  word-break: break-word;
+  word-break: normal; /* do not split words mid-word */
+  overflow-wrap: anywhere; /* allow wrapping at appropriate boundaries */
   padding: 8px;
+}
+
+/* Prevent wrapping specifically in the Role column (2nd column) */
+table th:nth-child(2),
+table td:nth-child(2) {
+  white-space: nowrap;
 }
 
 td.form {
