@@ -413,6 +413,7 @@ td.form form {
 /* Buttons */
 .card-actions {
   margin-top: 15px;
+  position: relative;
 }
 
 .button {
@@ -426,6 +427,10 @@ td.form form {
   display: inline-block;
   font-family: Arial, Helvetica, sans-serif;
   transition: background 0.2s ease;
+  line-height: 1.4;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
 }
 
 .button:hover {
@@ -446,6 +451,8 @@ td.form form {
   text-decoration: none;
   line-height: normal;
   vertical-align: middle;
+  position: relative;
+  z-index: 2;
 }
 
 .delete:hover {
