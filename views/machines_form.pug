@@ -5,7 +5,7 @@ block content
   .logout-button-container
     a.button-logout(href="/") Log out
   if machine && machine.MachineID
-    h1 Edit Machine #{machine.MachineID}
+    h1 Edit #{machine.MachineName}
   else
     h1 New Machine
 

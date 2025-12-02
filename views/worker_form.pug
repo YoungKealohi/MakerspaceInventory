@@ -5,7 +5,7 @@ block content
     a.button-logout(href="/") Log out
 
   if worker && worker.WorkerID
-    h1 Edit Worker
+    h1 Edit #{worker.FirstName} #{worker.LastName}
   else
     h1 New Worker
 
