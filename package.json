@@ -6,13 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "assign-passwords": "node scripts/assign_worker_passwords.js"
   },
   "license": "ISC",
   "author": "kealohi",
   "dependencies": {
     "body-parser": "^2.2.0",
     "dotenv": "^17.2.3",
+    "bcryptjs": "^2.4.3",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "mysql2": "^3.15.3",

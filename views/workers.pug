@@ -1,9 +1,6 @@
 extends layout
 
 block content
-  .logout-button-container
-    a.button-logout(href="/") Log out
-
   h1 Workers
   p 
     a.button-nav(href=`/machines/`) Go Back To Machines
@@ -31,6 +28,12 @@ block content
           td= worker.specialties || '—'
           td!= worker.availabilityDisplay
           td.form
-            a.button(href=`/workers/${worker.WorkerID}/edit`) Edit
-            form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');")
-              button.delete(type="submit") Delete
+            - const canEdit = session && (session.isAdmin || session.workerId == worker.WorkerID)
+            - const canDelete = session && session.isAdmin
+            if canEdit
+              a.button(href=`/workers/${worker.WorkerID}/edit`) Edit
+            //- Do not render Edit button when not allowed
+            if canDelete
+              form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');", style="display:inline; margin-left:8px")
+                button.delete(type="submit") Delete
+            //- Do not render Delete button when not allowed

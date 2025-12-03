@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db/pool");
+const bcrypt = require('bcryptjs');
 
 // Helper function to format time from 24-hour to 12-hour AM/PM format
 function formatTime(time24) {
@@ -11,7 +12,7 @@ function formatTime(time24) {
     return `${hour12}:${minutes} ${ampm}`;
 }
 
-// Hardcoded users
+// Hardcoded users (admin fallback)
 const users = [
     { username: 'admin', password: 'admin123' },
     { username: 'user', password: 'user123' }
@@ -64,14 +65,14 @@ router.get('/', async (req, res) => {
         }));
 
         // Compute makerspace hours per weekday from WorkerAvailability
-                const [hoursRows] = await pool.query(`
-                        SELECT 
-                            DayOfWeek, 
-                            TIME_FORMAT(MIN(StartTime), '%H:%i') AS OpenTime, 
-                            TIME_FORMAT(MAX(EndTime), '%H:%i') AS CloseTime
-                        FROM WorkerAvailability
-                        GROUP BY DayOfWeek
-                `);
+        const [hoursRows] = await pool.query(`
+                SELECT 
+                    DayOfWeek, 
+                    TIME_FORMAT(MIN(StartTime), '%H:%i') AS OpenTime, 
+                    TIME_FORMAT(MAX(EndTime), '%H:%i') AS CloseTime
+                FROM WorkerAvailability
+                GROUP BY DayOfWeek
+        `);
         const dayNameMap = {1:'Sunday',2:'Monday',3:'Tuesday',4:'Wednesday',5:'Thursday',6:'Friday',7:'Saturday'};
         const makerspaceHours = {};
         for (const row of hoursRows) {
@@ -158,30 +159,95 @@ router.get('/login', (req, res) => {
 });
 
 // POST login authentication
-router.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    
-    // Check if user exists
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-        req.session.username = username;
-        req.session.isAdmin = (username === 'admin'); // Set isAdmin flag
-        // Successful login - redirect to machines page
-        res.redirect('/machines');
-    } else {
-        // Failed login - show error
-        res.render('login', { 
-            title: "Login", 
-            error: "Invalid username or password" 
-        });
+router.post('/login', async (req, res) => {
+    try {
+        const { email, username, password } = req.body;
+
+        // If email supplied, attempt worker login
+        if (email) {
+            const [rows] = await pool.query('SELECT WorkerID, Email, PasswordHash, FirstName, MustChangePassword FROM Worker WHERE Email = ?', [email]);
+            if (rows && rows.length > 0) {
+                const worker = rows[0];
+                if (worker.PasswordHash && await bcrypt.compare(password, worker.PasswordHash)) {
+                    req.session.username = worker.FirstName;
+                    req.session.isAdmin = false;
+                    req.session.workerId = worker.WorkerID;
+                    // persist whether the worker must change password in the session
+                    req.session.mustChangePassword = !!worker.MustChangePassword;
+                    // If they must change password, send them to change screen
+                    if (worker.MustChangePassword) return req.session.save(() => res.redirect('/change-password'));
+                    // Ensure session is saved before redirecting to the main dashboard
+                    return req.session.save(err => {
+                        if (err) console.error('Session save error:', err);
+                        return res.redirect('/machines');
+                    });
+                }
+            }
+            return res.render('login', { title: 'Login', error: 'Invalid email or password' });
+        }
+
+        // Fallback to legacy username
+        if (username) {
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                req.session.username = username;
+                req.session.isAdmin = (username === 'admin');
+                return req.session.save(err => {
+                    if (err) console.error('Session save error:', err);
+                    return res.redirect('/machines');
+                });
+            }
+        }
+
+        return res.render('login', { title: 'Login', error: 'Invalid credentials' });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).render('login', { title: 'Login', error: 'Server error during login' });
     }
+});
+
+// Change password (worker only)
+router.get('/change-password', (req, res) => {
+    if (!req.session?.workerId) return res.redirect('/login');
+    res.render('change_password', { title: 'Change Password', error: null });
+});
+
+router.post('/change-password', async (req, res) => {
+    try {
+        const workerId = req.session?.workerId;
+        if (!workerId) return res.redirect('/login');
+        const { password, confirm } = req.body;
+        if (!password || password !== confirm) return res.render('change_password', { title: 'Change Password', error: 'Passwords do not match' });
+        const hash = await bcrypt.hash(password, 10);
+        await pool.query('UPDATE Worker SET PasswordHash = ?, MustChangePassword = 0 WHERE WorkerID = ?', [hash, workerId]);
+        // Clear the session flag and ensure the session is saved before redirecting to the dashboard
+        req.session.mustChangePassword = false;
+        return req.session.save(err => {
+            if (err) console.error('Session save error after password change:', err);
+            return res.redirect('/machines');
+        });
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).render('change_password', { title: 'Change Password', error: 'Server error' });
+    }
+});
+
+// Profile page (protected)
+router.get('/profile', (req, res) => {
+    // allow either a logged-in worker or admin (legacy)
+    if (!req.session?.workerId && !req.session?.isAdmin) return res.redirect('/login');
+    res.render('profile', { title: 'Profile' });
 });
 
 router.get('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login');
     });
+});
+
+// Debug: return current session (helpful to check login state)
+router.get('/session', (req, res) => {
+    res.json({ session: req.session || null });
 });
 
 module.exports = router;

@@ -6,7 +6,19 @@ html
     link(rel="stylesheet", href="/stylesheets/style.css")
   body(class=page)
     header.navbar
-      img(src="/images/hpu-primary-color-400px.png") 
+      img(src="/images/hpu-primary-color-400px.png")
       h1= "Makerspace"
+      //- Right side auth buttons
+      if session && session.workerId
+        .auth-controls(style="position:absolute; right:10px; top:18px; display:flex; gap:8px; align-items:center;")
+          span(style="color:#4f758b; font-weight:600;") Hello, #{session.username}
+          a.button-logout(href="/logout") Logout
+      else if session && session.isAdmin
+        .auth-controls(style="position:absolute; right:10px; top:18px; display:flex; gap:8px; align-items:center;")
+          span(style="color:#4f758b; font-weight:600;") Admin: #{session.username}
+          a.button-logout(href="/logout") Logout
+      else
+        .auth-controls(style="position:absolute; right:10px; top:18px;")
+          a.button-login-home(href="/login") Worker Login
     block content
     

@@ -56,6 +56,8 @@ router.get("/", async (req, res) => {
 
 // GET /workers/new - Show form to add new worker
 router.get("/new", async (req, res) => {
+  // only admins may create new workers
+  if (!req.session?.isAdmin) return res.status(403).send('Forbidden');
   try {
     // fetch machines so specialties can be selected when creating
     const [machines] = await pool.query("SELECT MachineID, MachineName FROM Machine ORDER BY MachineName");
@@ -78,6 +80,8 @@ router.get("/new", async (req, res) => {
 
 // POST /workers/new - Create new worker
 router.post("/new", async (req, res) => {
+  // only admins may create new workers
+  if (!req.session?.isAdmin) return res.status(403).send('Forbidden');
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -125,6 +129,13 @@ router.post("/new", async (req, res) => {
 
 // GET /workers/:id/edit - Show form to edit worker
 router.get("/:id/edit", async (req, res) => {
+  // allow only admins or the worker themselves to view the edit form
+  const requestedId = Number(req.params.id);
+  const sessionWorkerId = Number(req.session?.workerId || 0);
+  if (!req.session?.isAdmin && sessionWorkerId !== requestedId) {
+    // Not allowed
+    return res.status(403).send('Forbidden');
+  }
   try {
     const [workers] = await pool.query("SELECT * FROM Worker WHERE WorkerID = ?", [req.params.id]);
     if (workers.length === 0) {
@@ -167,16 +178,29 @@ router.get("/:id/edit", async (req, res) => {
 
 // POST /workers/:id/edit - Update worker
 router.post("/:id/edit", async (req, res) => {
+  // allow only admins or the worker themselves to perform updates
+  const requestedId = Number(req.params.id);
+  const sessionWorkerId = Number(req.session?.workerId || 0);
+  if (!req.session?.isAdmin && sessionWorkerId !== requestedId) {
+    return res.status(403).send('Forbidden');
+  }
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
     
     const { FirstName, LastName, IsBoss, PhoneNumber, Email, MachineIDs, availability } = req.body;
     
-    // Update worker details
+    // If the editor is not an admin, preserve IsBoss value from DB (don't allow non-admins to change boss flag)
+    let isBossValue = IsBoss ? 1 : 0;
+    if (!req.session?.isAdmin) {
+      const [rows] = await connection.query("SELECT IsBoss FROM Worker WHERE WorkerID = ?", [req.params.id]);
+      isBossValue = rows && rows[0] ? (rows[0].IsBoss ? 1 : 0) : 0;
+    }
+
+    // Update worker details (only allowed after authorization check)
     await connection.query(
       "UPDATE Worker SET FirstName = ?, LastName = ?, IsBoss = ?, PhoneNumber = ?, Email = ? WHERE WorkerID = ?",
-      [FirstName, LastName, IsBoss ? 1 : 0, PhoneNumber || null, Email || null, req.params.id]
+      [FirstName, LastName, isBossValue, PhoneNumber || null, Email || null, req.params.id]
     );
     
     // Update specialties - delete all and re-insert
@@ -218,6 +242,8 @@ router.post("/:id/edit", async (req, res) => {
 
 // POST /workers/delete/:id - Delete worker
 router.post("/delete/:id", async (req, res) => {
+  // only admins may delete workers
+  if (!req.session?.isAdmin) return res.status(403).send('Forbidden');
   try {
     await pool.query("DELETE FROM Worker WHERE WorkerID = ?", [req.params.id]);
     res.redirect("/workers");

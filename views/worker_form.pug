@@ -1,9 +1,6 @@
 extends layout
 
 block content
-  .logout-button-container
-    a.button-logout(href="/") Log out
-
   if worker && worker.WorkerID
     h1 Edit #{worker.FirstName} #{worker.LastName}
   else
@@ -19,10 +16,12 @@ block content
       label(for="LastName") Last Name:
       input#LastName(type="text", name="LastName", required, maxlength="20", value=worker ? worker.LastName : "")
 
-    div
-      label(for="IsBoss")
-        input#IsBoss(type="checkbox", name="IsBoss", checked=(worker && worker.IsBoss ? true : false))
-        |  Is Boss
+    //- Only admins may see or change the IsBoss flag
+    if session && session.isAdmin
+      div
+        label(for="IsBoss")
+          input#IsBoss(type="checkbox", name="IsBoss", checked=(worker && worker.IsBoss ? true : false))
+          |  Is Boss
 
     div
       label(for="PhoneNumber") Phone Number:

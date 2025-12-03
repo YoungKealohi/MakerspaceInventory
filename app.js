@@ -28,6 +28,12 @@ app.use(session({
   }
 }));
 
+// Make session available in all templates via res.locals.session
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+});
+
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
