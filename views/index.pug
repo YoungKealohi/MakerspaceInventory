@@ -44,6 +44,7 @@ block content
                 td.worker-name-cell= worker.FirstName
                 td.worker-specialty-cell= worker.specialties || '—'
                 td.worker-time-cell= worker.StartTime + ' - ' + worker.EndTime
+        p *All workers are trained on all machines.
       else
         p.no-schedule No workers scheduled today.
 
