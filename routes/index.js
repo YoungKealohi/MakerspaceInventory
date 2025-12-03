@@ -63,12 +63,31 @@ router.get('/', async (req, res) => {
             EndTime: formatTime(worker.EndTime)
         }));
 
+        // Compute makerspace hours per weekday from WorkerAvailability
+                const [hoursRows] = await pool.query(`
+                        SELECT 
+                            DayOfWeek, 
+                            TIME_FORMAT(MIN(StartTime), '%H:%i') AS OpenTime, 
+                            TIME_FORMAT(MAX(EndTime), '%H:%i') AS CloseTime
+                        FROM WorkerAvailability
+                        GROUP BY DayOfWeek
+                `);
+        const dayNameMap = {1:'Sunday',2:'Monday',3:'Tuesday',4:'Wednesday',5:'Thursday',6:'Friday',7:'Saturday'};
+        const makerspaceHours = {};
+        for (const row of hoursRows) {
+            makerspaceHours[dayNameMap[row.DayOfWeek]] = {
+                open: row.OpenTime ? formatTime(row.OpenTime) : 'Closed',
+                close: row.CloseTime ? formatTime(row.CloseTime) : ''
+            };
+        }
+
         res.render('index', {
             title: "Welcome",
             page: "index",
             machines: machines,
             schedule: formattedSchedule,
             currentWeekday: currentWeekday,
+            makerspaceHours,
             isAdmin: req.session?.isAdmin || false
         });
     } catch (err) {
@@ -79,6 +98,7 @@ router.get('/', async (req, res) => {
             machines: [],
             schedule: [],
             currentWeekday: 'Today',
+            makerspaceHours: {},
             isAdmin: req.session?.isAdmin || false
         });
     }
