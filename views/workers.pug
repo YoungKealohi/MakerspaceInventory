@@ -5,8 +5,9 @@ block content
   p 
     a.button-nav(href=`/machines/`) Go Back To Machines
 
-  p
-    a.button-nav(href="/workers/new") Add New Worker
+  if session && session.isAdmin
+    p
+      a.button-nav(href="/workers/new") Add New Worker
 
   table(border="1" cellpadding="6" cellspacing="0")
     thead
@@ -22,7 +23,10 @@ block content
       each worker in workers
         tr
           td= worker.FirstName + ' ' + worker.LastName
-          td= worker.IsBoss ? 'Boss' : 'Worker'
+          if worker.IsAdmin
+            td Admin
+          else
+            td= worker.IsBoss ? 'Boss' : 'Worker'
           td= worker.PhoneNumber || '—'
           td= worker.Email || '—'
           td= worker.specialties || '—'

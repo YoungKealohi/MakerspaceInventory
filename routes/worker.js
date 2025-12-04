@@ -85,10 +85,12 @@ router.post("/new", async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    const { FirstName, LastName, IsBoss, PhoneNumber, Email, MachineIDs, availability } = req.body;
+    const { FirstName, LastName, IsBoss, IsAdmin, PhoneNumber, Email, MachineIDs, availability } = req.body;
+    // Only admins may set IsAdmin on create via the form. The route itself is admin-only so it's safe.
+    const isAdminValue = IsAdmin ? 1 : 0;
     const [result] = await connection.query(
-      "INSERT INTO Worker (FirstName, LastName, IsBoss, PhoneNumber, Email) VALUES (?, ?, ?, ?, ?)",
-      [FirstName, LastName, IsBoss ? 1 : 0, PhoneNumber || null, Email || null]
+      "INSERT INTO Worker (FirstName, LastName, IsBoss, IsAdmin, PhoneNumber, Email) VALUES (?, ?, ?, ?, ?, ?)",
+      [FirstName, LastName, IsBoss ? 1 : 0, isAdminValue, PhoneNumber || null, Email || null]
     );
     const workerId = result.insertId;
 
@@ -188,19 +190,21 @@ router.post("/:id/edit", async (req, res) => {
   try {
     await connection.beginTransaction();
     
-    const { FirstName, LastName, IsBoss, PhoneNumber, Email, MachineIDs, availability } = req.body;
+  const { FirstName, LastName, IsBoss, IsAdmin, PhoneNumber, Email, MachineIDs, availability } = req.body;
     
-    // If the editor is not an admin, preserve IsBoss value from DB (don't allow non-admins to change boss flag)
+    // If the editor is not an admin, preserve IsBoss and IsAdmin values from DB (don't allow non-admins to change these flags)
     let isBossValue = IsBoss ? 1 : 0;
+    let isAdminValue = IsAdmin ? 1 : 0;
     if (!req.session?.isAdmin) {
-      const [rows] = await connection.query("SELECT IsBoss FROM Worker WHERE WorkerID = ?", [req.params.id]);
+      const [rows] = await connection.query("SELECT IsBoss, IsAdmin FROM Worker WHERE WorkerID = ?", [req.params.id]);
       isBossValue = rows && rows[0] ? (rows[0].IsBoss ? 1 : 0) : 0;
+      isAdminValue = rows && rows[0] ? (rows[0].IsAdmin ? 1 : 0) : 0;
     }
 
     // Update worker details (only allowed after authorization check)
     await connection.query(
-      "UPDATE Worker SET FirstName = ?, LastName = ?, IsBoss = ?, PhoneNumber = ?, Email = ? WHERE WorkerID = ?",
-      [FirstName, LastName, isBossValue, PhoneNumber || null, Email || null, req.params.id]
+      "UPDATE Worker SET FirstName = ?, LastName = ?, IsBoss = ?, IsAdmin = ?, PhoneNumber = ?, Email = ? WHERE WorkerID = ?",
+      [FirstName, LastName, isBossValue, isAdminValue, PhoneNumber || null, Email || null, req.params.id]
     );
     
     // Update specialties - delete all and re-insert

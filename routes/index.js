@@ -165,13 +165,14 @@ router.post('/login', async (req, res) => {
 
         // If email supplied, attempt worker login
         if (email) {
-            const [rows] = await pool.query('SELECT WorkerID, Email, PasswordHash, FirstName, MustChangePassword FROM Worker WHERE Email = ?', [email]);
+            const [rows] = await pool.query('SELECT WorkerID, Email, PasswordHash, FirstName, MustChangePassword, IsAdmin FROM Worker WHERE Email = ?', [email]);
             if (rows && rows.length > 0) {
                 const worker = rows[0];
                 if (worker.PasswordHash && await bcrypt.compare(password, worker.PasswordHash)) {
-                    req.session.username = worker.FirstName;
-                    req.session.isAdmin = false;
-                    req.session.workerId = worker.WorkerID;
+                        req.session.username = worker.FirstName;
+                        // Set isAdmin from the database so admins are recognized at login
+                        req.session.isAdmin = !!worker.IsAdmin;
+                        req.session.workerId = worker.WorkerID;
                     // persist whether the worker must change password in the session
                     req.session.mustChangePassword = !!worker.MustChangePassword;
                     // If they must change password, send them to change screen
