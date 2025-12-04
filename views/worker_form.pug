@@ -17,7 +17,8 @@ block content
       input#LastName(type="text", name="LastName", required, maxlength="20", value=worker ? worker.LastName : "")
 
     //- Only admins may see or change the IsBoss and IsAdmin flags
-    if session && session.isAdmin
+    - var viewerIsAdmin = (typeof isAdmin !== 'undefined') ? isAdmin : (session && session.isAdmin)
+    if viewerIsAdmin
       div
         label(for="IsBoss")
           input#IsBoss(type="checkbox", name="IsBoss", checked=(worker && worker.IsBoss ? true : false))

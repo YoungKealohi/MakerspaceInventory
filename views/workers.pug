@@ -5,7 +5,8 @@ block content
   p 
     a.button-nav(href=`/machines/`) Go Back To Machines
 
-  if session && session.isAdmin
+  - var isViewerAdmin = (typeof isAdmin !== 'undefined') ? isAdmin : ((typeof viewerIsAdmin !== 'undefined') ? viewerIsAdmin : (session && session.isAdmin))
+  if isViewerAdmin
     p
       a.button-nav(href="/workers/new") Add New Worker
 
@@ -32,12 +33,15 @@ block content
           td= worker.specialties || '—'
           td!= worker.availabilityDisplay
           td.form
-            - const canEdit = session && (session.isAdmin || session.workerId == worker.WorkerID)
-            - const canDelete = session && session.isAdmin
+            - const canEdit = (isViewerAdmin) || (session && session.workerId == worker.WorkerID)
+            - const canDelete = !!isViewerAdmin
             if canEdit
-              a.button(href=`/workers/${worker.WorkerID}/edit`) Edit
+              a.button.action-gap(href=`/workers/${worker.WorkerID}/edit`) Edit
             //- Do not render Edit button when not allowed
+            // allow admins to grant/revoke admin status
             if canDelete
-              form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');", style="display:inline; margin-left:8px")
+              form(method="post", action=`/workers/delete/${worker.WorkerID}`, onsubmit="return confirm('Delete this worker?');", class="action-gap")
                 button.delete(type="submit") Delete
+
+            // admin toggle removed from list; admin status can be changed on the edit page
             //- Do not render Delete button when not allowed

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db/pool");
+const { requireAdmin, requireSelfOrAdmin } = require('../middleware/auth');
 
 // Helper function to format time from 24-hour to 12-hour AM/PM format
 function formatTime(time24) {
@@ -44,9 +45,27 @@ router.get("/", async (req, res) => {
       }
     }
 
+    // Determine whether the current viewer is an admin.
+    // Prefer the session value (covers legacy 'admin' username logins which don't have a WorkerID),
+    // otherwise fall back to a fresh DB lookup when a workerId exists.
+    let viewerIsAdmin = !!req.session?.isAdmin;
+    try {
+      if (!viewerIsAdmin && req.session?.workerId) {
+        const [viewerRows] = await pool.query('SELECT IsAdmin FROM Worker WHERE WorkerID = ?', [req.session.workerId]);
+        viewerIsAdmin = viewerRows && viewerRows[0] ? !!viewerRows[0].IsAdmin : false;
+      }
+    } catch (e) {
+      console.error('Error checking viewer admin status:', e);
+      // keep whatever we have from the session
+    }
+
+    console.log('Rendering /workers for session.workerId=', req.session?.workerId, 'viewerIsAdmin=', viewerIsAdmin);
+    // Pass a consistent `isAdmin` variable into the template (and keep viewerIsAdmin for backward compat)
     res.render("workers", {
       title: "Workers",
-      workers: workers
+      workers: workers,
+      viewerIsAdmin,
+      isAdmin: viewerIsAdmin
     });
   } catch (err) {
     console.error(err);
@@ -54,10 +73,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /workers/new - Show form to add new worker
-router.get("/new", async (req, res) => {
-  // only admins may create new workers
-  if (!req.session?.isAdmin) return res.status(403).send('Forbidden');
+// GET /workers/new - Show form to add new worker (admins only)
+router.get("/new", requireAdmin, async (req, res) => {
   try {
     // fetch machines so specialties can be selected when creating
     const [machines] = await pool.query("SELECT MachineID, MachineName FROM Machine ORDER BY MachineName");
@@ -78,10 +95,8 @@ router.get("/new", async (req, res) => {
   }
 });
 
-// POST /workers/new - Create new worker
-router.post("/new", async (req, res) => {
-  // only admins may create new workers
-  if (!req.session?.isAdmin) return res.status(403).send('Forbidden');
+// POST /workers/new - Create new worker (admins only)
+router.post("/new", requireAdmin, async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -129,15 +144,8 @@ router.post("/new", async (req, res) => {
   }
 });
 
-// GET /workers/:id/edit - Show form to edit worker
-router.get("/:id/edit", async (req, res) => {
-  // allow only admins or the worker themselves to view the edit form
-  const requestedId = Number(req.params.id);
-  const sessionWorkerId = Number(req.session?.workerId || 0);
-  if (!req.session?.isAdmin && sessionWorkerId !== requestedId) {
-    // Not allowed
-    return res.status(403).send('Forbidden');
-  }
+// GET /workers/:id/edit - Show form to edit worker (admins or the worker themselves)
+router.get("/:id/edit", requireSelfOrAdmin, async (req, res) => {
   try {
     const [workers] = await pool.query("SELECT * FROM Worker WHERE WorkerID = ?", [req.params.id]);
     if (workers.length === 0) {
@@ -170,7 +178,9 @@ router.get("/:id/edit", async (req, res) => {
       availabilities: availabilities,
       formatTime: formatTime,
       formAction: `/workers/${req.params.id}/edit`,
-      submitLabel: "Update Worker"
+      submitLabel: "Update Worker",
+      // tell the form whether the viewer is an admin so the form can show/hide IsAdmin
+      isAdmin: req.session?.isAdmin || false
     });
   } catch (err) {
     console.error(err);
@@ -178,27 +188,31 @@ router.get("/:id/edit", async (req, res) => {
   }
 });
 
-// POST /workers/:id/edit - Update worker
-router.post("/:id/edit", async (req, res) => {
-  // allow only admins or the worker themselves to perform updates
-  const requestedId = Number(req.params.id);
-  const sessionWorkerId = Number(req.session?.workerId || 0);
-  if (!req.session?.isAdmin && sessionWorkerId !== requestedId) {
-    return res.status(403).send('Forbidden');
-  }
+// POST /workers/:id/edit - Update worker (admins or the worker themselves)
+router.post("/:id/edit", requireSelfOrAdmin, async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
     
   const { FirstName, LastName, IsBoss, IsAdmin, PhoneNumber, Email, MachineIDs, availability } = req.body;
-    
+
+    // Fetch current IsAdmin for audit and self-demotion check
+    const [currentRows] = await connection.query("SELECT IsBoss, IsAdmin FROM Worker WHERE WorkerID = ?", [req.params.id]);
+    const current = currentRows && currentRows[0] ? currentRows[0] : { IsBoss: 0, IsAdmin: 0 };
+    const oldIsAdmin = current.IsAdmin ? 1 : 0;
+
     // If the editor is not an admin, preserve IsBoss and IsAdmin values from DB (don't allow non-admins to change these flags)
     let isBossValue = IsBoss ? 1 : 0;
     let isAdminValue = IsAdmin ? 1 : 0;
     if (!req.session?.isAdmin) {
-      const [rows] = await connection.query("SELECT IsBoss, IsAdmin FROM Worker WHERE WorkerID = ?", [req.params.id]);
-      isBossValue = rows && rows[0] ? (rows[0].IsBoss ? 1 : 0) : 0;
-      isAdminValue = rows && rows[0] ? (rows[0].IsAdmin ? 1 : 0) : 0;
+      isBossValue = current.IsBoss ? 1 : 0;
+      isAdminValue = oldIsAdmin;
+    }
+
+    // Prevent an admin from removing their own admin rights via the edit form
+    if (req.session?.workerId && Number(req.session.workerId) === Number(req.params.id) && req.session?.isAdmin && isAdminValue === 0 && oldIsAdmin === 1) {
+      await connection.rollback();
+      return res.status(400).send('Cannot remove your own admin rights');
     }
 
     // Update worker details (only allowed after authorization check)
@@ -234,6 +248,21 @@ router.post("/:id/edit", async (req, res) => {
     }
     
     await connection.commit();
+
+    // If IsAdmin changed and the editor is an admin, insert an audit row
+    try {
+      if (req.session?.isAdmin && (isAdminValue !== oldIsAdmin)) {
+        const actorId = req.session.workerId || null;
+        await pool.query(
+          "INSERT INTO AdminAudit (ActorWorkerID, TargetWorkerID, OldValue, NewValue, CreatedAt) VALUES (?, ?, ?, ?, NOW())",
+          [actorId, req.params.id, oldIsAdmin, isAdminValue]
+        );
+      }
+    } catch (auditErr) {
+      console.error('Failed to write AdminAudit row:', auditErr);
+      // don't fail the whole request for an audit insert failure
+    }
+
     res.redirect("/workers");
   } catch (err) {
     await connection.rollback();
@@ -244,10 +273,8 @@ router.post("/:id/edit", async (req, res) => {
   }
 });
 
-// POST /workers/delete/:id - Delete worker
-router.post("/delete/:id", async (req, res) => {
-  // only admins may delete workers
-  if (!req.session?.isAdmin) return res.status(403).send('Forbidden');
+// POST /workers/delete/:id - Delete worker (admins only)
+router.post("/delete/:id", requireAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM Worker WHERE WorkerID = ?", [req.params.id]);
     res.redirect("/workers");
@@ -257,4 +284,22 @@ router.post("/delete/:id", async (req, res) => {
   }
 });
 
+// POST /workers/toggle-admin/:id - Grant or revoke admin rights (admins only)
+router.post('/toggle-admin/:id', requireAdmin, async (req, res) => {
+  try {
+    const setAdmin = req.body && req.body.setAdmin === '1' ? 1 : 0;
+    const targetId = Number(req.params.id);
+    // Prevent an admin from removing their own admin rights to avoid accidental lockout
+    if (req.session?.workerId && req.session.workerId === targetId && setAdmin === 0) {
+      return res.status(400).send('Cannot remove your own admin rights');
+    }
+    await pool.query('UPDATE Worker SET IsAdmin = ? WHERE WorkerID = ?', [setAdmin, req.params.id]);
+    res.redirect('/workers');
+  } catch (err) {
+    console.error('Error toggling admin flag:', err);
+    res.status(500).send('Database error');
+  }
+});
+
 module.exports = router;
+

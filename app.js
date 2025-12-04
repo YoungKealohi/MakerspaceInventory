@@ -9,6 +9,7 @@ const workerRouter = require("./routes/worker");
 const lowStockRouter = require("./routes/low_stock");
 
 const session = require('express-session');
+const pool = require('./db/pool');
 
 const app = express();
 const port = 3000;
@@ -31,6 +32,22 @@ app.use(session({
 // Make session available in all templates via res.locals.session
 app.use((req, res, next) => {
   res.locals.session = req.session;
+  next();
+});
+
+// Keep session.isAdmin fresh by checking the DB on each request when a workerId is present.
+// This avoids requiring users to re-login when their admin flag changes.
+app.use(async (req, res, next) => {
+  try {
+    if (req.session?.workerId) {
+  const [rows] = await pool.query('SELECT IsAdmin FROM Worker WHERE WorkerID = ?', [req.session.workerId]);
+  req.session.isAdmin = rows && rows[0] ? !!rows[0].IsAdmin : false;
+      // ensure res.locals has the updated session
+      res.locals.session = req.session;
+    }
+  } catch (err) {
+    console.error('Error refreshing session isAdmin flag:', err);
+  }
   next();
 });
 

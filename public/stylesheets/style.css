@@ -361,15 +361,36 @@ td.form {
   text-align: center;
 }
 
+td.form {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  /* a bit more padding so action buttons aren't cramped */
+  padding: 12px 10px;
+}
+
 td.form > * {
   display: inline-block;
-  margin: 0 2.5px;
+  /* wider horizontal gap between inline action elements */
+  margin: 0 8px;
 }
 
 td.form form {
   margin: 0;
   padding: 0;
   display: inline;
+}
+
+/* Utility spacing for action buttons inside the workers table */
+.action-gap {
+  margin-right: 16px;
+}
+
+.admin-toggle-form {
+  display: block;
+  margin-top: 12px;
+  /* align under buttons without extra left offset */
+  margin-left: 0;
 }
 
 
@@ -442,6 +463,19 @@ td.form form {
 
 .button:hover {
   background: #0056b3;
+}
+
+/* Smaller admin toggle button used in the workers list (Make Admin / Revoke Admin) */
+.admin-toggle {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1;
+  margin: 0 4px;
+}
+
+.admin-toggle:hover {
+  /* keep hover visual similar but slightly darker */
+  background: #004a99;
 }
 
 .delete {
