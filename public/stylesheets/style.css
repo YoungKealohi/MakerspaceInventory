@@ -257,7 +257,7 @@ body {
 }
 
 .schedule-content {
-  min-height: 200px;
+  min-height: auto;
 }
 
 .day-schedule {
