@@ -24,15 +24,15 @@ router.get('/', async (req, res) => {
         const [machines] = await pool.query('SELECT * FROM Machine ORDER BY MachineName');
 
         // Fetch today's worker schedule (name, specialty, availability, time)
-        let today = new Date();
-        let todayDayOfWeek = today.getDay(); // JavaScript: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, etc.
+        // Use Hawaii timezone (UTC-10) for consistency
+        const today = new Date();
+        const hawaiiTime = new Date(today.toLocaleString('en-US', { timeZone: 'Pacific/Honolulu' }));
+        let todayDayOfWeek = hawaiiTime.getDay(); // JavaScript: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, etc.
         
         // If today is weekend, show Monday's schedule instead
         if (todayDayOfWeek === 0) { // Sunday, show Monday
-            today.setDate(today.getDate() + 1);
             todayDayOfWeek = 1;
         } else if (todayDayOfWeek === 6) { // Saturday, show Monday
-            today.setDate(today.getDate() + 2);
             todayDayOfWeek = 1;
         }
         
@@ -110,10 +110,11 @@ router.get('/api/schedule', async (req, res) => {
     try {
         const dayOffset = parseInt(req.query.dayOffset) || 0;
         
-        // Calculate the target date
+        // Calculate the target date in Hawaii timezone
         const today = new Date();
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + dayOffset);
+        const hawaiiTime = new Date(today.toLocaleString('en-US', { timeZone: 'Pacific/Honolulu' }));
+        const targetDate = new Date(hawaiiTime);
+        targetDate.setDate(hawaiiTime.getDate() + dayOffset);
         
         const targetDayOfWeek = targetDate.getDay(); // JavaScript: 0=Sunday, 1=Monday, etc.
         const mysqlDayOfWeek = targetDayOfWeek + 1; // MySQL: 1=Sunday, 2=Monday, etc.

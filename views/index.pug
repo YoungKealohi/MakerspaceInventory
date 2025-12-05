@@ -66,6 +66,10 @@ block content
   //- Script: schedule positioning and update handlers
   script.
     let currentDayOffset = 0; // 0 = today, -1 = yesterday, +1 = tomorrow, etc.
+    
+    // Debug: Log today's actual day
+    const debugToday = new Date();
+    console.log('Today is:', debugToday.toDateString(), '| Day of week:', debugToday.getDay(), '(0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat)');
 
     function positionScheduleNav() {
       // Keep a hook for future adjustments, but do not set left/width or
