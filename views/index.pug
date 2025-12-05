@@ -64,102 +64,102 @@ block content
                   | Closed
 
   //- Script: schedule positioning and update handlers
-    script.
-      let currentDayOffset = 0; // 0 = today, -1 = yesterday, +1 = tomorrow, etc.
+  script.
+    let currentDayOffset = 0; // 0 = today, -1 = yesterday, +1 = tomorrow, etc.
 
-      function positionScheduleNav() {
-        // Keep a hook for future adjustments, but do not set left/width or
-        // panel padding. The nav should flow with document layout so it
-        // scrolls with content and does not require absolute positioning.
-        const schedulePanel = document.querySelector('.worker-schedule-panel');
-        const scheduleNav = document.querySelector('.schedule-nav');
-        if (!schedulePanel || !scheduleNav) return;
+    function positionScheduleNav() {
+      // Keep a hook for future adjustments, but do not set left/width or
+      // panel padding. The nav should flow with document layout so it
+      // scrolls with content and does not require absolute positioning.
+      const schedulePanel = document.querySelector('.worker-schedule-panel');
+      const scheduleNav = document.querySelector('.schedule-nav');
+      if (!schedulePanel || !scheduleNav) return;
 
-        // No inline layout mutations here. If needed later we can compute
-        // measurements to tweak CSS, but for now let CSS control sizing.
-      }
+      // No inline layout mutations here. If needed later we can compute
+      // measurements to tweak CSS, but for now let CSS control sizing.
+    }
 
-      // Run on DOM ready and after small delays to catch font/layout shifts
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          positionScheduleNav();
-          setTimeout(positionScheduleNav, 200);
-        });
-      } else {
+    // Run on DOM ready and after small delays to catch font/layout shifts
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
         positionScheduleNav();
         setTimeout(positionScheduleNav, 200);
-      }
-
-      // Debounced resize
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(positionScheduleNav, 120);
       });
+    } else {
+      positionScheduleNav();
+      setTimeout(positionScheduleNav, 200);
+    }
 
-      // Helper to skip weekends
-      function getNextWeekdayOffset(currentOffset, direction) {
-        let newOffset = currentOffset;
-        do {
-          newOffset += direction;
-          const today = new Date();
-          const targetDate = new Date(today);
-          targetDate.setDate(today.getDate() + newOffset);
-          const dayOfWeek = targetDate.getDay();
-          if (dayOfWeek >= 1 && dayOfWeek <= 5) return newOffset;
-        } while (true);
-      }
+    // Debounced resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(positionScheduleNav, 120);
+    });
 
-      function updateSchedule(dayOffset) {
-        currentDayOffset = dayOffset;
-        fetch(`/api/schedule?dayOffset=${dayOffset}`)
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('currentDay').textContent = data.weekdayName;
-            const schedulePanel = document.querySelector('.worker-schedule-panel');
-            const existingTable = schedulePanel.querySelector('.schedule-table');
-            const existingMessage = schedulePanel.querySelector('.no-schedule');
+    // Helper to skip weekends
+    function getNextWeekdayOffset(currentOffset, direction) {
+      let newOffset = currentOffset;
+      do {
+        newOffset += direction;
+        const today = new Date();
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + newOffset);
+        const dayOfWeek = targetDate.getDay();
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) return newOffset;
+      } while (true);
+    }
 
-            if (data.schedule && data.schedule.length > 0) {
-              if (existingMessage) existingMessage.remove();
-              let tableHTML = `
-                <table class="schedule-table" style="margin: 0 auto;">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Specialty</th>
-                      <th>Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>`;
-              data.schedule.forEach(worker => {
-                tableHTML += `
+    function updateSchedule(dayOffset) {
+      currentDayOffset = dayOffset;
+      fetch(`/api/schedule?dayOffset=${dayOffset}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('currentDay').textContent = data.weekdayName;
+          const schedulePanel = document.querySelector('.worker-schedule-panel');
+          const existingTable = schedulePanel.querySelector('.schedule-table');
+          const existingMessage = schedulePanel.querySelector('.no-schedule');
+
+          if (data.schedule && data.schedule.length > 0) {
+            if (existingMessage) existingMessage.remove();
+            let tableHTML = `
+              <table class="schedule-table" style="margin: 0 auto;">
+                <thead>
                   <tr>
-                    <td class="worker-name-cell">${worker.FirstName}</td>
-                    <td class="worker-specialty-cell">${worker.specialties || '—'}</td>
-                    <td class="worker-time-cell">${worker.StartTime} - ${worker.EndTime}</td>
-                  </tr>`;
-              });
-              tableHTML += '</tbody></table>';
-              if (existingTable) existingTable.outerHTML = tableHTML; else schedulePanel.insertAdjacentHTML('beforeend', tableHTML);
-            } else {
-              if (existingTable) existingTable.remove();
-              if (!existingMessage) schedulePanel.insertAdjacentHTML('beforeend', '<p class="no-schedule">No workers scheduled today.</p>');
-            }
-          })
-          .catch(error => console.error('Error fetching schedule:', error));
-      }
+                    <th>Name</th>
+                    <th>Specialty</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+            data.schedule.forEach(worker => {
+              tableHTML += `
+                <tr>
+                  <td class="worker-name-cell">${worker.FirstName}</td>
+                  <td class="worker-specialty-cell">${worker.specialties || '—'}</td>
+                  <td class="worker-time-cell">${worker.StartTime} - ${worker.EndTime}</td>
+                </tr>`;
+            });
+            tableHTML += '</tbody></table>';
+            if (existingTable) existingTable.outerHTML = tableHTML; else schedulePanel.insertAdjacentHTML('beforeend', tableHTML);
+          } else {
+            if (existingTable) existingTable.remove();
+            if (!existingMessage) schedulePanel.insertAdjacentHTML('beforeend', '<p class="no-schedule">No workers scheduled today.</p>');
+          }
+        })
+        .catch(error => console.error('Error fetching schedule:', error));
+    }
 
-      document.addEventListener('click', (e) => {
-        if (e.target && e.target.id === 'prevDay') {
-          const newOffset = getNextWeekdayOffset(currentDayOffset, -1);
-          updateSchedule(newOffset);
-        }
-        if (e.target && e.target.id === 'nextDay') {
-          const newOffset = getNextWeekdayOffset(currentDayOffset, 1);
-          updateSchedule(newOffset);
-        }
-      });
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'prevDay') {
+        const newOffset = getNextWeekdayOffset(currentDayOffset, -1);
+        updateSchedule(newOffset);
+      }
+      if (e.target && e.target.id === 'nextDay') {
+        const newOffset = getNextWeekdayOffset(currentDayOffset, 1);
+        updateSchedule(newOffset);
+      }
+    });
 
   // (removed duplicate bottom Makerspace hours - moved into schedule panel)
   // Footer contact
