@@ -46,22 +46,21 @@ block content
       else
         p.no-schedule No workers scheduled today.
 
-  // Separate Makerspace Hours section - now outside worker-schedule-panel
-  .makerspace-hours-container(style="display: flex; justify-content: center; margin-top: 32px;")
-    .makerspace-hours(style="max-width: 600px;")
-      h3 Makerspace Hours
-      table
-        tbody
-          - const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-          each day in days
-            tr
-              td.mh-label #{day}:
-              td.mh-time
-                - const hours = makerspaceHours && makerspaceHours[day]
-                if hours && hours.open !== 'Closed'
-                  | #{hours.open}-#{hours.close}
-                else
-                  | Closed
+      // Makerspace Hours inside worker-schedule-panel
+      .makerspace-hours(style="margin-top: 24px;")
+        h3 Makerspace Hours
+        table
+          tbody
+            - const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+            each day in days
+              tr
+                td.mh-label #{day}:
+                td.mh-time
+                  - const hours = makerspaceHours && makerspaceHours[day]
+                  if hours && hours.open !== 'Closed'
+                    | #{hours.open}-#{hours.close}
+                  else
+                    | Closed
 
   //- Script: schedule positioning and update handlers
   script.
