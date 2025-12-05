@@ -97,7 +97,7 @@ block content
       resizeTimer = setTimeout(positionScheduleNav, 120);
     });
 
-    // Helper to skip weekends
+    // Helper to skip weekends (Sunday=0, Saturday=6)
     function getNextWeekdayOffset(currentOffset, direction) {
       let newOffset = currentOffset;
       do {
@@ -106,7 +106,8 @@ block content
         const targetDate = new Date(today);
         targetDate.setDate(today.getDate() + newOffset);
         const dayOfWeek = targetDate.getDay();
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) return newOffset;
+        // Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) return newOffset;
       } while (true);
     }
 
